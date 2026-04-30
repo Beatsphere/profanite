@@ -1,6 +1,6 @@
 {
   "name": "@beatsphere/profanite-darwin-arm64",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "os": [
     "darwin"
   ],
