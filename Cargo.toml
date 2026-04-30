@@ -7,6 +7,17 @@ members = [
     "crates/profanite-semantic",
     "bench",
 ]
+# profanite-py uses pyo3's `extension-module` feature, which deliberately
+# leaves libpython symbols unresolved at link time (they're provided by the
+# host Python at runtime). That makes it fail `cargo test --workspace`
+# anywhere libpython isn't directly available (notably macOS CI). Build
+# the Python crate only via `maturin` / explicit `cargo build -p profanite-py`.
+default-members = [
+    "crates/profanite-core",
+    "crates/profanite-node",
+    "crates/profanite-semantic",
+    "bench",
+]
 
 [workspace.package]
 version = "0.1.0"

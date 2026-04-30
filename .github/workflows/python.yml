@@ -31,9 +31,15 @@ jobs:
       - name: Install maturin + pytest
         run: pip install 'maturin>=1.5,<2.0' pytest
 
-      - name: Build + install profanite
+      # `maturin develop` needs an active virtualenv; CI's setup-python
+      # doesn't create one. Build a wheel instead and pip-install it.
+      - name: Build wheel
         working-directory: crates/profanite-py
-        run: maturin develop --release
+        run: maturin build --release --out dist
+
+      - name: Install wheel
+        shell: bash
+        run: pip install --force-reinstall crates/profanite-py/dist/*.whl
 
       - name: Smoke test
         run: pytest crates/profanite-py/tests/test_smoke.py -v
