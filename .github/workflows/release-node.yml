@@ -140,11 +140,17 @@ jobs:
       - name: List staged npm packages
         run: ls -la npm/
 
-      - name: Publish platform subpackages + main
+      - name: Publish platform subpackages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # `napi prepublish -t npm` updates each subpackage's package.json,
-          # then publishes each followed by the main package. `--skip-gh-release`
-          # keeps this job focused on npm; GitHub release is created separately.
+          # `napi prepublish -t npm` publishes each platform subpackage.
+          # Despite the name, it does NOT publish the main package — that
+          # happens in the step below. `--skip-gh-release` suppresses the
+          # GitHub Release creation; we do that separately if at all.
           npx napi prepublish -t npm --skip-gh-release
+
+      - name: Publish main package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance false
