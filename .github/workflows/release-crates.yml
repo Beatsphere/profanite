@@ -1,0 +1,34 @@
+name: Release crates.io
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: cargo publish profanite-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      # `cargo publish --dry-run` catches the usual release-time mistakes
+      # (missing readme, forbidden path deps, uncommitted build.rs inputs)
+      # before we consume the one-shot upload slot on crates.io.
+      - name: Verify package
+        run: cargo publish --dry-run -p profanite-core --features all-langs
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        # --allow-dirty is needed because the docs sync workflow may leave
+        # README.md regenerated state in checkout tree. The actual publish
+        # reads Cargo.toml + include'd files, so this is safe.
+        run: cargo publish -p profanite-core --features all-langs --allow-dirty

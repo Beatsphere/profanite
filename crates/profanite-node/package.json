@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nishchaysinha/profanite.git"
+    "url": "git+https://github.com/Beatsphere/profanite.git"
   },
   "license": "GPL-3.0-or-later",
   "keywords": [
@@ -20,27 +20,44 @@
     "censor",
     "moderation",
     "bad-words",
-    "chat"
+    "chat",
+    "obfuscation"
   ],
   "engines": {
     "node": ">= 14"
   },
   "scripts": {
-    "build": "napi build --platform --release",
-    "build:debug": "napi build --platform",
+    "build": "napi build --platform --release --js false --dts false .",
+    "build:debug": "napi build --platform --js false --dts false .",
+    "prepublishOnly": "napi prepublish -t npm --skip-gh-release",
+    "artifacts": "napi artifacts",
     "test": "node test/smoke.js"
   },
   "devDependencies": {
     "@napi-rs/cli": "^2.18.0"
   },
+  "optionalDependencies": {
+    "@profanite/linux-x64-gnu": "0.1.0",
+    "@profanite/linux-x64-musl": "0.1.0",
+    "@profanite/linux-arm64-gnu": "0.1.0",
+    "@profanite/darwin-x64": "0.1.0",
+    "@profanite/darwin-arm64": "0.1.0",
+    "@profanite/win32-x64-msvc": "0.1.0"
+  },
   "napi": {
     "name": "profanite",
+    "package": {
+      "name": "@profanite"
+    },
     "triples": {
-      "defaults": true,
+      "defaults": false,
       "additional": [
+        "x86_64-unknown-linux-gnu",
         "x86_64-unknown-linux-musl",
         "aarch64-unknown-linux-gnu",
-        "aarch64-apple-darwin"
+        "x86_64-apple-darwin",
+        "aarch64-apple-darwin",
+        "x86_64-pc-windows-msvc"
       ]
     }
   }

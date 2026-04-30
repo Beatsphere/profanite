@@ -7,6 +7,17 @@ license.workspace = true
 repository.workspace = true
 description.workspace = true
 authors.workspace = true
+keywords = ["profanity", "filter", "censor", "moderation", "unicode"]
+categories = ["text-processing"]
+readme = "README.md"
+# LDNOOBW data is CC0 and safe to redistribute; ship it in the published
+# package so downstream users don't need to fetch it separately at build.
+include = [
+    "src/**/*.rs",
+    "build.rs",
+    "data/**/*.txt",
+    "README.md",
+]
 
 [features]
 default = ["lang-en"]

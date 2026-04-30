@@ -1,0 +1,157 @@
+name: Release Node
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  DEBUG: napi:*
+  APP_NAME: profanite
+  MACOSX_DEPLOYMENT_TARGET: "10.13"
+
+defaults:
+  run:
+    working-directory: crates/profanite-node
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            build: |
+              cargo build --release --target x86_64-unknown-linux-gnu
+              cp ../../target/x86_64-unknown-linux-gnu/release/libprofanite_node.so profanite.linux-x64-gnu.node
+              strip profanite.linux-x64-gnu.node || true
+
+          - host: ubuntu-22.04
+            target: x86_64-unknown-linux-musl
+            # Build inside a musl container so the produced .node links cleanly
+            # on Alpine. We install the Rust toolchain fresh inside the image
+            # and run cargo build ourselves.
+            docker: messense/rust-musl-cross:x86_64-musl
+            build: |
+              cargo build --release --target x86_64-unknown-linux-musl
+              cp ../../target/x86_64-unknown-linux-musl/release/libprofanite_node.so profanite.linux-x64-musl.node
+              /usr/local/musl/bin/x86_64-linux-musl-strip profanite.linux-x64-musl.node || true
+
+          - host: ubuntu-22.04
+            target: aarch64-unknown-linux-gnu
+            setup: |
+              sudo apt-get update
+              sudo apt-get install -y gcc-aarch64-linux-gnu
+            build: |
+              export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+              cargo build --release --target aarch64-unknown-linux-gnu
+              cp ../../target/aarch64-unknown-linux-gnu/release/libprofanite_node.so profanite.linux-arm64-gnu.node
+              aarch64-linux-gnu-strip profanite.linux-arm64-gnu.node || true
+
+          - host: macos-13
+            target: x86_64-apple-darwin
+            build: |
+              cargo build --release --target x86_64-apple-darwin
+              cp ../../target/x86_64-apple-darwin/release/libprofanite_node.dylib profanite.darwin-x64.node
+              strip -x profanite.darwin-x64.node || true
+
+          - host: macos-14
+            target: aarch64-apple-darwin
+            build: |
+              cargo build --release --target aarch64-apple-darwin
+              cp ../../target/aarch64-apple-darwin/release/libprofanite_node.dylib profanite.darwin-arm64.node
+              strip -x profanite.darwin-arm64.node || true
+
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+            build: |
+              cargo build --release --target x86_64-pc-windows-msvc
+              cp ../../target/x86_64-pc-windows-msvc/release/profanite_node.dll profanite.win32-x64-msvc.node
+
+    name: build ${{ matrix.target }}
+    runs-on: ${{ matrix.host }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Native builds: use the host Rust toolchain with the target added.
+      - uses: dtolnay/rust-toolchain@stable
+        if: ${{ !matrix.docker }}
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        if: ${{ !matrix.docker }}
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install cross-compile toolchain
+        if: ${{ matrix.setup }}
+        shell: bash
+        run: ${{ matrix.setup }}
+
+      - name: Build natively
+        if: ${{ !matrix.docker }}
+        shell: bash
+        run: ${{ matrix.build }}
+
+      - name: Build in Docker (musl)
+        if: ${{ matrix.docker }}
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ${{ matrix.docker }}
+          options: -v ${{ github.workspace }}:/work -w /work/crates/profanite-node
+          run: ${{ matrix.build }}
+
+      - name: Upload .node artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings-${{ matrix.target }}
+          path: crates/profanite-node/profanite.*.node
+          if-no-files-found: error
+
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install @napi-rs/cli
+        run: npm install --no-save @napi-rs/cli@^2.18.0
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: crates/profanite-node/artifacts
+
+      - name: Move artifacts into napi layout
+        run: npx napi artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List staged npm packages
+        run: ls -la npm/
+
+      - name: Publish platform subpackages + main
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # `napi prepublish -t npm` updates each subpackage's package.json,
+          # then publishes each followed by the main package. `--skip-gh-release`
+          # keeps this job focused on npm; GitHub release is created separately.
+          npx napi prepublish -t npm --skip-gh-release

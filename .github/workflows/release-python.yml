@@ -1,0 +1,163 @@
+name: Release Python
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: crates/profanite-py
+
+jobs:
+  linux:
+    name: ${{ matrix.platform.target }} · manylinux + musllinux
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          # manylinux_2_28 gets us RHEL 8 / Ubuntu 20.04+ / Debian 11+.
+          # abi3-py38 means one wheel covers CPython 3.8+, so we don't
+          # multiply the matrix by Python versions.
+          - runner: ubuntu-22.04
+            target: x86_64
+            manylinux: manylinux_2_28
+          - runner: ubuntu-22.04
+            target: aarch64
+            manylinux: manylinux_2_28
+          - runner: ubuntu-22.04
+            target: x86_64
+            manylinux: musllinux_1_2
+            suffix: musl
+          - runner: ubuntu-22.04
+            target: aarch64
+            manylinux: musllinux_1_2
+            suffix: musl
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: ${{ matrix.platform.manylinux }}
+          working-directory: crates/profanite-py
+          args: --release --out dist
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ matrix.platform.target }}${{ matrix.platform.suffix && format('-{0}', matrix.platform.suffix) || '' }}
+          path: crates/profanite-py/dist/*.whl
+          if-no-files-found: error
+
+  macos:
+    name: macos-${{ matrix.platform.target }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - runner: macos-13
+            target: x86_64
+          - runner: macos-14
+            target: aarch64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          working-directory: crates/profanite-py
+          args: --release --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos-${{ matrix.platform.target }}
+          path: crates/profanite-py/dist/*.whl
+          if-no-files-found: error
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: x86_64
+          working-directory: crates/profanite-py
+          args: --release --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows-x64
+          path: crates/profanite-py/dist/*.whl
+          if-no-files-found: error
+
+  sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          working-directory: crates/profanite-py
+          args: --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: crates/profanite-py/dist/*.tar.gz
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    needs: [linux, macos, windows, sdist]
+    runs-on: ubuntu-latest
+    # Trusted publishing via OIDC — no long-lived PyPI token needed IF the
+    # project uses PyPI Trusted Publishers. If it doesn't, set a
+    # PYPI_API_TOKEN secret and use `password: ${{ secrets.PYPI_API_TOKEN }}`.
+    environment:
+      name: pypi
+      url: https://pypi.org/p/profanite
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -la dist/
+
+      - name: Publish to PyPI
+        uses: PyO3/maturin-action@v1
+        with:
+          command: upload
+          args: --non-interactive --skip-existing dist/*
