@@ -8,7 +8,7 @@ Add these under **Settings → Secrets and variables → Actions**:
 
 | Secret | Purpose | How to get it |
 |---|---|---|
-| `NPM_TOKEN` | Publish to npm (main `profanite` package + 6 platform subpackages under `@profanite`) | `npm login` then copy from `~/.npmrc`, or create an automation token at npmjs.com |
+| `NPM_TOKEN` | Publish to npm (main `@beatsphere/profanite` package + 6 platform subpackages `@beatsphere/profanite-<triple>`) | `npm login` then copy from `~/.npmrc`, or create an automation token at npmjs.com |
 | `CARGO_REGISTRY_TOKEN` | Publish `profanite-core` to crates.io | `cargo login` after creating a token at crates.io/me |
 | `PYPI_API_TOKEN` (optional) | Publish wheels to PyPI | Only needed if NOT using PyPI Trusted Publishers (see below) |
 
@@ -24,14 +24,17 @@ Add these under **Settings → Secrets and variables → Actions**:
 
 If Trusted Publishers is too fiddly, skip all of that and set `PYPI_API_TOKEN`; the workflow auto-falls-back when the OIDC flow has no issuer.
 
-### npm: create the scope for platform subpackages
+### npm: scope setup
 
-```bash
-npm login
-npm access create-package @profanite/linux-x64-gnu --access public
-# Repeat for each of: linux-x64-musl, linux-arm64-gnu, darwin-x64, darwin-arm64, win32-x64-msvc
-# (Or just publish them for the first time — npm creates them automatically.)
-```
+The main package is `@beatsphere/profanite`. Platform subpackages are
+`@beatsphere/profanite-linux-x64-gnu`, `@beatsphere/profanite-darwin-arm64`, etc.
+
+The `@beatsphere` scope needs to exist on your npm account before publishing.
+`npm login` then either create an organization at npmjs.com/settings/orgs, or
+publish under your personal scope if the account already owns it.
+
+The first `npm publish` creates each subpackage automatically. Scope setup
+is a one-time thing.
 
 ## Cutting a release
 
@@ -83,8 +86,8 @@ echo 'profanite-core = "0.1.1"' >> Cargo.toml
 cargo build && cargo run
 
 # Node
-cd $(mktemp -d) && npm init -y && npm install profanite
-node -e 'const {Profanite} = require("profanite"); console.log(new Profanite().contains_profanity("hello"))'
+cd $(mktemp -d) && npm init -y && npm install @beatsphere/profanite
+node -e 'const {Profanite} = require("@beatsphere/profanite"); console.log(new Profanite().containsProfanity("hello"))'
 
 # Python
 python3 -m venv /tmp/pv && source /tmp/pv/bin/activate && pip install profanite

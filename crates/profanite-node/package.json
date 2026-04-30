@@ -1,5 +1,5 @@
 {
-  "name": "profanite",
+  "name": "@beatsphere/profanite",
   "version": "0.1.0",
   "description": "Kryptonite for profanities — lightweight, obfuscation-resistant profanity filter",
   "main": "index.js",
@@ -26,6 +26,9 @@
   "engines": {
     "node": ">= 14"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "napi build --platform --release --js false --dts false .",
     "build:debug": "napi build --platform --js false --dts false .",
@@ -37,17 +40,17 @@
     "@napi-rs/cli": "^2.18.0"
   },
   "optionalDependencies": {
-    "@profanite/linux-x64-gnu": "0.1.0",
-    "@profanite/linux-x64-musl": "0.1.0",
-    "@profanite/linux-arm64-gnu": "0.1.0",
-    "@profanite/darwin-x64": "0.1.0",
-    "@profanite/darwin-arm64": "0.1.0",
-    "@profanite/win32-x64-msvc": "0.1.0"
+    "@beatsphere/profanite-linux-x64-gnu": "0.1.0",
+    "@beatsphere/profanite-linux-x64-musl": "0.1.0",
+    "@beatsphere/profanite-linux-arm64-gnu": "0.1.0",
+    "@beatsphere/profanite-darwin-x64": "0.1.0",
+    "@beatsphere/profanite-darwin-arm64": "0.1.0",
+    "@beatsphere/profanite-win32-x64-msvc": "0.1.0"
   },
   "napi": {
     "name": "profanite",
     "package": {
-      "name": "@profanite"
+      "name": "@beatsphere/profanite"
     },
     "triples": {
       "defaults": false,

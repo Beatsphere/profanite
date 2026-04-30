@@ -50,7 +50,7 @@ function tryLoad() {
 
   // 1. Subpackage installed via optionalDependencies.
   try {
-    return require(`@profanite/${id}`);
+    return require(`@beatsphere/profanite-${id}`);
   } catch {
     // fall through
   }

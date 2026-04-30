@@ -48,26 +48,19 @@ profanite-core = { version = "{{VERSION}}", features = ["all-langs"] }
 
 ### Node.js
 
-> Publishing to npm is planned for v0.1 release (task M7). For now, build locally from source:
-
 ```bash
-git clone https://github.com/Beatsphere/profanite
-cd profanite
-cargo build --release -p profanite-node
-# The .node binary lands under target/release/; see crates/profanite-node/index.js
-# for the resolver that loads it. A CI-driven prebuilt-binary flow is task M7.
+npm install @beatsphere/profanite
 ```
+
+Platform-specific native binaries ship via `optionalDependencies`; npm picks the right one for your OS/arch automatically (Linux x64/arm64 gnu + musl, macOS x64/arm64, Windows x64).
 
 ### Python
 
-Until v0.1 ships to PyPI, build locally via [maturin](https://www.maturin.rs/):
-
 ```bash
-pip install maturin
-git clone https://github.com/Beatsphere/profanite
-cd profanite/crates/profanite-py
-maturin develop --release
+pip install profanite
 ```
+
+Prebuilt wheels for Linux (manylinux + musllinux, x86_64 + aarch64), macOS (x86_64 + arm64), and Windows x64. Python 3.8+ via the stable `abi3` ABI.
 
 ---
 

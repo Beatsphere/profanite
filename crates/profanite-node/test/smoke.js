@@ -106,7 +106,7 @@ section('invalid language rejects with a descriptive error', () => {
 console.log('\nall smoke tests passed');
 
 // Also execute the README-exported quickstart example to keep the docs
-// honest. We rewrite the sole `require('profanite')` on the fly so it
+// honest. We rewrite the sole published-name require() on the fly so it
 // resolves to this in-tree package.
 section('quickstart example from examples/quickstart.js runs', () => {
   const fs = require('node:fs');
@@ -116,7 +116,7 @@ section('quickstart example from examples/quickstart.js runs', () => {
   const examplePath = path.join(__dirname, '..', 'examples', 'quickstart.js');
   const original = fs.readFileSync(examplePath, 'utf8');
   const patched = original.replace(
-    "require('profanite')",
+    "require('@beatsphere/profanite')",
     "require('..')"
   );
   // Evaluate the patched source in a fresh module scope so it really

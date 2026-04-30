@@ -6,7 +6,7 @@
  * regenerates automatically; if this example breaks, CI fails.
  */
 
-const { Profanite } = require('profanite');
+const { Profanite } = require('@beatsphere/profanite');
 
 // Build a filter once, reuse for many inputs.
 const filter = new Profanite({
