@@ -31,15 +31,17 @@ jobs:
 
           - host: ubuntu-22.04
             target: x86_64-unknown-linux-musl
-            # Use the host toolchain with the musl target added, not the
-            # rust-musl-cross image — that image disables cdylib output,
-            # which would leave us with no .node artifact to ship.
+            # Rust's default musl target is static-only, so cargo silently
+            # drops cdylib output with "dropping unsupported crate type".
+            # -C target-feature=-crt-static tells the linker to produce a
+            # dynamic library that Node can dlopen on Alpine.
             setup: |
               sudo apt-get update
               sudo apt-get install -y musl-tools
             build: |
               export CC_x86_64_unknown_linux_musl=musl-gcc
               export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc
+              export RUSTFLAGS="-C target-feature=-crt-static"
               cargo build --release --target x86_64-unknown-linux-musl
               cp ../../target/x86_64-unknown-linux-musl/release/libprofanite_node.so profanite.linux-x64-musl.node
               strip profanite.linux-x64-musl.node || true

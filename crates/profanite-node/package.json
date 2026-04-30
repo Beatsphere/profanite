@@ -1,6 +1,6 @@
 {
   "name": "@beatsphere/profanite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Kryptonite for profanities — lightweight, obfuscation-resistant profanity filter",
   "main": "index.js",
   "types": "index.d.ts",
@@ -40,12 +40,12 @@
     "@napi-rs/cli": "^2.18.0"
   },
   "optionalDependencies": {
-    "@beatsphere/profanite-linux-x64-gnu": "0.1.1",
-    "@beatsphere/profanite-linux-x64-musl": "0.1.1",
-    "@beatsphere/profanite-linux-arm64-gnu": "0.1.1",
-    "@beatsphere/profanite-darwin-x64": "0.1.1",
-    "@beatsphere/profanite-darwin-arm64": "0.1.1",
-    "@beatsphere/profanite-win32-x64-msvc": "0.1.1"
+    "@beatsphere/profanite-linux-x64-gnu": "0.1.2",
+    "@beatsphere/profanite-linux-x64-musl": "0.1.2",
+    "@beatsphere/profanite-linux-arm64-gnu": "0.1.2",
+    "@beatsphere/profanite-darwin-x64": "0.1.2",
+    "@beatsphere/profanite-darwin-arm64": "0.1.2",
+    "@beatsphere/profanite-win32-x64-msvc": "0.1.2"
   },
   "napi": {
     "name": "profanite",
