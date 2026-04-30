@@ -8,9 +8,11 @@ on:
 permissions:
   contents: read
 
-defaults:
-  run:
-    working-directory: crates/profanite-py
+# No top-level `defaults.run.working-directory` — it applies to every step
+# in every job, including the publish job which runs on a fresh runner
+# without checking out the repo. Each build step that needs the Python
+# crate directory already passes `working-directory:` into the
+# maturin-action, so there's nothing to inherit.
 
 jobs:
   linux:
