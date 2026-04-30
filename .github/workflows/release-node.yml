@@ -31,14 +31,18 @@ jobs:
 
           - host: ubuntu-22.04
             target: x86_64-unknown-linux-musl
-            # Build inside a musl container so the produced .node links cleanly
-            # on Alpine. We install the Rust toolchain fresh inside the image
-            # and run cargo build ourselves.
-            docker: messense/rust-musl-cross:x86_64-musl
+            # Use the host toolchain with the musl target added, not the
+            # rust-musl-cross image — that image disables cdylib output,
+            # which would leave us with no .node artifact to ship.
+            setup: |
+              sudo apt-get update
+              sudo apt-get install -y musl-tools
             build: |
+              export CC_x86_64_unknown_linux_musl=musl-gcc
+              export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc
               cargo build --release --target x86_64-unknown-linux-musl
               cp ../../target/x86_64-unknown-linux-musl/release/libprofanite_node.so profanite.linux-x64-musl.node
-              /usr/local/musl/bin/x86_64-linux-musl-strip profanite.linux-x64-musl.node || true
+              strip profanite.linux-x64-musl.node || true
 
           - host: ubuntu-22.04
             target: aarch64-unknown-linux-gnu

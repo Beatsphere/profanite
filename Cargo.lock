@@ -793,7 +793,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-bench"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -806,7 +806,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aho-corasick",
  "criterion",
@@ -817,7 +817,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-node"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "napi",
  "napi-build",
@@ -827,7 +827,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-py"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "profanite-core",
  "pyo3",
@@ -835,7 +835,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-semantic"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "profanite-core",
 ]
