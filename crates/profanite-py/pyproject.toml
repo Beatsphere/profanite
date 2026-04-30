@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "profanite"
-version = "0.1.2"
+version = "0.1.3"
 description = "Kryptonite for profanities — lightweight, obfuscation-resistant profanity filter"
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
