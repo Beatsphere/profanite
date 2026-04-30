@@ -11,10 +11,10 @@
 
 ## Status
 
-- **Version:** `0.1.0`
-- **Bundled languages:** English (`en`), Spanish (`es`), Hindi (romanized) (`hi`), French (`fr`), German (`de`)
+- **Version:** `{{VERSION}}`
+- **Bundled languages:** {{LANGUAGES}}
 - **Targets:** Rust (native) · Node.js (napi-rs binding) · Python (planned)
-- **MSRV:** Rust `1.77`
+- **MSRV:** Rust `{{MSRV}}`
 
 ---
 
@@ -37,13 +37,13 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-profanite-core = "0.1.0"
+profanite-core = "{{VERSION}}"
 ```
 
 Feature flags select which bundled language lists compile in. Default is `lang-en`. Turn on others explicitly, or enable `all-langs`:
 
 ```toml
-profanite-core = { version = "0.1.0", features = ["all-langs"] }
+profanite-core = { version = "{{VERSION}}", features = ["all-langs"] }
 ```
 
 ### Node.js
@@ -68,43 +68,7 @@ Coming in v0.1 (task M5, PyO3 + maturin).
 
 <!-- BEGIN: examples/quickstart.rs -->
 ```rust
-//! Quickstart example — this file is the canonical Rust usage snippet.
-//!
-//! The README pulls its Rust code block directly from here via
-//! `scripts/sync-readme.py`, so if you change this example the README
-//! regenerates automatically. Conversely, if this example stops
-//! compiling, CI fails and the README can't drift out of sync.
-
-use profanite_core::{CensorStyle, Lang, Profanite};
-
-fn main() {
-    // Build a filter. One-time cost; reuse the instance for many inputs.
-    let filter = Profanite::builder()
-        .language(Lang::En)
-        .censor_style(CensorStyle::LengthPreserving)
-        .build()
-        .expect("builds with defaults");
-
-    // Detect.
-    assert!(filter.contains_profanity("what the fuck"));
-    assert!(!filter.contains_profanity("have a nice day"));
-
-    // Censor. Default style masks each character with '*'.
-    assert_eq!(filter.censor("what the fuck"), "what the ****");
-
-    // Locate. Each match returns original + normalized spans plus metadata.
-    let hits = filter.find("oh fuck that");
-    assert_eq!(hits.len(), 1);
-    assert_eq!(hits[0].original_span, (3, 7));
-
-    // Obfuscation-resistant matching handles leet, homoglyphs, repeats,
-    // zero-width chars, fullwidth, and bidi overrides.
-    assert!(filter.contains_profanity("what the fuсk")); // Cyrillic 'с'
-    assert!(filter.contains_profanity("fuuuuuuck"));
-    assert!(filter.contains_profanity("ＦＵＣＫ"));
-
-    println!("quickstart ok");
-}
+{{RUST_EXAMPLE}}
 ```
 <!-- END: examples/quickstart.rs -->
 
@@ -118,41 +82,7 @@ cargo run -p profanite-core --example quickstart
 
 <!-- BEGIN: examples/quickstart.js -->
 ```js
-/**
- * Quickstart example — this file is the canonical Node usage snippet.
- *
- * The README pulls its JS code block directly from here via
- * `scripts/sync-readme.py`. If you change this example, the README
- * regenerates automatically; if this example breaks, CI fails.
- */
-
-const { Profanite } = require('profanite');
-
-// Build a filter once, reuse for many inputs.
-const filter = new Profanite({
-  languages: ['en'],
-  censorStyle: 'lengthPreserving',
-});
-
-// Detect.
-console.assert(filter.containsProfanity('what the fuck') === true);
-console.assert(filter.containsProfanity('have a nice day') === false);
-
-// Censor. Default style masks each character with '*'.
-console.assert(filter.censor('what the fuck') === 'what the ****');
-
-// Locate. Each match carries spans + category + severity.
-const hits = filter.find('oh fuck that');
-console.assert(hits.length === 1);
-console.assert(hits[0].start === 3 && hits[0].end === 7);
-
-// Obfuscation-resistant matching covers leet, homoglyphs, repeats,
-// zero-width chars, fullwidth, and bidi overrides.
-console.assert(filter.containsProfanity('what the fuсk')); // Cyrillic 'с'
-console.assert(filter.containsProfanity('fuuuuuuck'));
-console.assert(filter.containsProfanity('ＦＵＣＫ'));
-
-console.log('quickstart ok');
+{{NODE_EXAMPLE}}
 ```
 <!-- END: examples/quickstart.js -->
 

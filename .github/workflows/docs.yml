@@ -1,0 +1,23 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  readme-sync:
+    name: README.md matches template + examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Verify README.md is in sync
+        run: python3 scripts/sync-readme.py --check
+
+    # Note: the canonical examples themselves are exercised by the main
+    # CI (Rust `cargo test --workspace` compiles all examples) and the
+    # Node CI (`smoke.js` runs examples/quickstart.js). If either ever
+    # breaks, those workflows catch it before this one has a chance to.
