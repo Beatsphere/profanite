@@ -76,6 +76,14 @@ enum Command {
     },
     /// Print the list of available release gates and their thresholds.
     Gates,
+    /// Run the full suite and write a compact README-ready stats block to
+    /// `bench/STATS.md`. Used by scripts/sync-readme.py so the numbers
+    /// printed in the README can't drift from the latest measured values.
+    Snapshot {
+        /// Output path. Defaults to bench/STATS.md at the workspace root.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -87,6 +95,10 @@ fn main() -> Result<()> {
         Command::Gates => {
             gates::print_all();
             Ok(())
+        }
+        Command::Snapshot { out } => {
+            let out_path = out.unwrap_or_else(|| std::path::PathBuf::from("bench/STATS.md"));
+            suites::run_snapshot(&out_path)
         }
     }
 }

@@ -1,5 +1,7 @@
 //! Builder API and the main `Profanite` type.
 
+use std::sync::Arc;
+
 use crate::allowlist::Allowlist;
 use crate::censor::{self, CensorStyle};
 use crate::data::{bundled_for, Category, WordEntry};
@@ -7,6 +9,7 @@ use crate::error::Error;
 use crate::lang::Lang;
 use crate::matcher::{Match, Matcher};
 use crate::normalize;
+use crate::scorer::{MatchContext, SemanticScorer};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum MatchMode {
@@ -25,7 +28,6 @@ pub enum NormalizationLevel {
     Aggressive,
 }
 
-#[derive(Debug)]
 pub struct Profanite {
     matcher: Matcher,
     allowlist: Allowlist,
@@ -33,6 +35,23 @@ pub struct Profanite {
     censor_style: CensorStyle,
     match_mode: MatchMode,
     normalization: NormalizationLevel,
+    scorer: Option<Arc<dyn SemanticScorer>>,
+    min_confidence: f32,
+}
+
+impl std::fmt::Debug for Profanite {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Profanite")
+            .field("matcher", &self.matcher)
+            .field("allowlist", &self.allowlist)
+            .field("mask_char", &self.mask_char)
+            .field("censor_style", &self.censor_style)
+            .field("match_mode", &self.match_mode)
+            .field("normalization", &self.normalization)
+            .field("scorer", &self.scorer.is_some())
+            .field("min_confidence", &self.min_confidence)
+            .finish()
+    }
 }
 
 impl Profanite {
@@ -46,10 +65,23 @@ impl Profanite {
     }
 
     /// Return every profanity hit in `text`.
+    ///
+    /// If a semantic scorer is attached, each keyword hit is passed to the
+    /// scorer; hits scoring below `min_confidence` are dropped.
     pub fn find(&self, text: &str) -> Vec<Match> {
         let norm = normalize::normalize(text, self.normalization);
-        let hits = self.matcher.scan(&norm, self.match_mode);
-        self.allowlist.filter(text, hits)
+        let mut hits = self.matcher.scan(&norm, self.match_mode);
+        hits = self.allowlist.filter(text, hits);
+        if let Some(scorer) = &self.scorer {
+            hits.retain(|m| {
+                let ctx = MatchContext {
+                    text,
+                    match_info: m,
+                };
+                scorer.score(&ctx) >= self.min_confidence
+            });
+        }
+        hits
     }
 
     /// Return `text` with all profanities masked according to the configured style.
@@ -70,6 +102,8 @@ pub struct ProfaniteBuilder {
     match_mode: Option<MatchMode>,
     normalization: Option<NormalizationLevel>,
     skip_bundled: bool,
+    scorer: Option<Arc<dyn SemanticScorer>>,
+    min_confidence: Option<f32>,
 }
 
 impl ProfaniteBuilder {
@@ -141,6 +175,21 @@ impl ProfaniteBuilder {
         self
     }
 
+    /// Attach a semantic scorer. Every candidate match is passed to the
+    /// scorer; matches whose score is below `min_confidence` are dropped.
+    /// Defaults to threshold `0.5` if a scorer is attached without an
+    /// explicit threshold.
+    pub fn scorer(mut self, scorer: Arc<dyn SemanticScorer>) -> Self {
+        self.scorer = Some(scorer);
+        self
+    }
+
+    /// Override the default `min_confidence` threshold for the attached scorer.
+    pub fn min_confidence(mut self, threshold: f32) -> Self {
+        self.min_confidence = Some(threshold);
+        self
+    }
+
     pub fn build(self) -> Result<Profanite, Error> {
         let mut words: Vec<WordEntry> = Vec::new();
         if !self.skip_bundled {
@@ -182,6 +231,8 @@ impl ProfaniteBuilder {
             censor_style: self.censor_style.unwrap_or_default(),
             match_mode: self.match_mode.unwrap_or_default(),
             normalization: self.normalization.unwrap_or_default(),
+            scorer: self.scorer,
+            min_confidence: self.min_confidence.unwrap_or(0.5),
         })
     }
 }
@@ -460,5 +511,59 @@ mod tests {
             .build()
             .unwrap();
         assert!(p.contains_profanity("what the fuck"));
+    }
+
+    // ---- Semantic scorer seam ----
+
+    struct ConstScorer(f32);
+    impl crate::scorer::SemanticScorer for ConstScorer {
+        fn score(&self, _ctx: &crate::scorer::MatchContext<'_>) -> f32 {
+            self.0
+        }
+    }
+
+    #[test]
+    fn scorer_suppresses_low_confidence_matches() {
+        let p = Profanite::builder()
+            .scorer(std::sync::Arc::new(ConstScorer(0.1)))
+            .min_confidence(0.5)
+            .build()
+            .unwrap();
+        // Keyword matcher would flag this, but scorer says it's low confidence.
+        assert!(!p.contains_profanity("what the fuck"));
+    }
+
+    #[test]
+    fn scorer_passes_high_confidence_matches() {
+        let p = Profanite::builder()
+            .scorer(std::sync::Arc::new(ConstScorer(0.9)))
+            .min_confidence(0.5)
+            .build()
+            .unwrap();
+        assert!(p.contains_profanity("what the fuck"));
+    }
+
+    #[test]
+    fn scorer_sees_match_context() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        struct CountingScorer(Arc<AtomicUsize>);
+        impl crate::scorer::SemanticScorer for CountingScorer {
+            fn score(&self, ctx: &crate::scorer::MatchContext<'_>) -> f32 {
+                // Sanity-check that the context actually carries the text.
+                assert!(!ctx.text.is_empty());
+                self.0.fetch_add(1, Ordering::SeqCst);
+                1.0
+            }
+        }
+        let counter = Arc::new(AtomicUsize::new(0));
+        let p = Profanite::builder()
+            .scorer(Arc::new(CountingScorer(counter.clone())))
+            .build()
+            .unwrap();
+        p.find("what the fuck and also fucking bad");
+        // Two matches -> two scorer calls.
+        assert_eq!(counter.load(Ordering::SeqCst), 2);
     }
 }

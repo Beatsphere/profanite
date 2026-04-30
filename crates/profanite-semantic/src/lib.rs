@@ -1,20 +1,9 @@
-//! Scaffolding for a semantic (embedding-based) profanity scorer.
+//! Home for real semantic-scoring implementations (ONNX Runtime, candle,
+//! etc.). The trait itself lives in `profanite-core` so the builder API
+//! doesn't pull this crate in — integrators who don't want ML stay on the
+//! zero-dep core.
 //!
-//! v1 ships the trait only. Real implementations (ONNX Runtime, candle, etc.)
-//! live behind feature flags in downstream examples.
+//! v0.1 re-exports the core trait so downstream crates have a single
+//! import path once we add real scorer types here.
 
-use profanite_core::Match;
-
-/// Context passed to a `SemanticScorer` so it can reason about a candidate match
-/// in surrounding text.
-#[derive(Debug, Clone)]
-pub struct MatchContext<'a> {
-    pub text: &'a str,
-    pub match_info: &'a Match,
-}
-
-/// A pluggable scoring hook. Implementors return a confidence in `[0.0, 1.0]`
-/// that a match is genuinely profane given its context.
-pub trait SemanticScorer: Send + Sync {
-    fn score(&self, ctx: &MatchContext<'_>) -> f32;
-}
+pub use profanite_core::{AlwaysProfane, MatchContext, SemanticScorer};

@@ -10,6 +10,7 @@ mod error;
 mod lang;
 mod matcher;
 mod normalize;
+mod scorer;
 
 pub use censor::CensorStyle;
 pub use config::{MatchMode, NormalizationLevel, Profanite, ProfaniteBuilder};
@@ -17,3 +18,4 @@ pub use data::{Category, WordEntry};
 pub use error::Error;
 pub use lang::Lang;
 pub use matcher::Match;
+pub use scorer::{AlwaysProfane, MatchContext, SemanticScorer};

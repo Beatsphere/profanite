@@ -3,12 +3,13 @@
 Regenerate README.md from README.template.md + canonical sources.
 
 Placeholders resolved by this script:
-    {{VERSION}}       - workspace.package.version from Cargo.toml
-    {{MSRV}}          - workspace.package.rust-version from Cargo.toml
-    {{LANGUAGES}}     - human list derived from bench/crates/profanite-core
-                        build.rs LANGS array
-    {{RUST_EXAMPLE}}  - contents of crates/profanite-core/examples/quickstart.rs
-    {{NODE_EXAMPLE}}  - contents of crates/profanite-node/examples/quickstart.js
+    {{VERSION}}         - workspace.package.version from Cargo.toml
+    {{MSRV}}            - workspace.package.rust-version from Cargo.toml
+    {{LANGUAGES}}       - human list derived from crates/profanite-core
+                          build.rs LANGS array
+    {{RUST_EXAMPLE}}    - crates/profanite-core/examples/quickstart.rs
+    {{NODE_EXAMPLE}}    - crates/profanite-node/examples/quickstart.js
+    {{PYTHON_EXAMPLE}}  - crates/profanite-py/examples/quickstart.py
 
 Usage:
     python3 scripts/sync-readme.py           # write README.md
@@ -30,6 +31,8 @@ CARGO_TOML = REPO / "Cargo.toml"
 BUILD_RS = REPO / "crates/profanite-core/build.rs"
 RUST_EXAMPLE = REPO / "crates/profanite-core/examples/quickstart.rs"
 NODE_EXAMPLE = REPO / "crates/profanite-node/examples/quickstart.js"
+PYTHON_EXAMPLE = REPO / "crates/profanite-py/examples/quickstart.py"
+BENCH_SNAPSHOT = REPO / "bench/STATS.md"
 
 LANG_NAMES = {
     "en": "English",
@@ -80,6 +83,13 @@ def render(template: str) -> str:
     langs = render_language_list(extract_languages(BUILD_RS.read_text()))
     rust_example = load_example(RUST_EXAMPLE)
     node_example = load_example(NODE_EXAMPLE)
+    python_example = load_example(PYTHON_EXAMPLE)
+    if not BENCH_SNAPSHOT.exists():
+        raise ValueError(
+            f"{BENCH_SNAPSHOT.relative_to(REPO)} missing. "
+            "Run `cargo run -p profanite-bench -- snapshot`."
+        )
+    bench_snapshot = BENCH_SNAPSHOT.read_text().strip()
 
     replacements = {
         "{{VERSION}}": version,
@@ -87,6 +97,8 @@ def render(template: str) -> str:
         "{{LANGUAGES}}": langs,
         "{{RUST_EXAMPLE}}": rust_example,
         "{{NODE_EXAMPLE}}": node_example,
+        "{{PYTHON_EXAMPLE}}": python_example,
+        "{{BENCH_SNAPSHOT}}": bench_snapshot,
     }
     out = template
     for key, value in replacements.items():

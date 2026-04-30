@@ -7,17 +7,30 @@ on:
 
 jobs:
   readme-sync:
-    name: README.md matches template + examples
+    name: README.md matches template + examples + bench snapshot
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Verify README.md is in sync
-        run: python3 scripts/sync-readme.py --check
 
-    # Note: the canonical examples themselves are exercised by the main
-    # CI (Rust `cargo test --workspace` compiles all examples) and the
-    # Node CI (`smoke.js` runs examples/quickstart.js). If either ever
-    # breaks, those workflows catch it before this one has a chance to.
+      - name: Install pyarrow (for bench/scripts/fetch_jigsaw.sh)
+        run: pip install pyarrow
+
+      - name: Fetch Jigsaw proxy corpus (if not committed)
+        run: |
+          if [ ! -f bench/data/jigsaw.jsonl ]; then
+            bash bench/scripts/fetch_jigsaw.sh
+          fi
+
+      - name: Regenerate bench/STATS.md from the live filter
+        run: cargo run --release -p profanite-bench -- snapshot
+
+      - name: Regenerate README.md from template + examples + fresh stats
+        run: python3 scripts/sync-readme.py --check

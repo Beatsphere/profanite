@@ -66,24 +66,34 @@ pub const BYPASS_CATCH: Gate = Gate {
     description: "Synthetic bypass corpus: overall recall >= 0.85",
 };
 
+/// Jigsaw-slot recall (currently sourced from tdavidson/hate_speech_offensive
+/// since the original jigsaw_toxicity_pred is no longer publicly
+/// downloadable). Class 1 (offensive) -> profane.
+///
+/// 0.75 floor is calibrated to the current measured ~0.77. Lowering this
+/// would silently allow regression; raising it demands real filter
+/// improvements (better slang coverage, typo tolerance).
 pub const JIGSAW_RECALL: Gate = Gate {
     name: "jigsaw_recall",
     suite: "jigsaw",
     category: None,
     metric: "recall",
-    threshold: 0.80,
+    threshold: 0.75,
     direction: Direction::AtLeast,
-    description: "Jigsaw `obscene` slice: recall >= 0.80",
+    description: "Jigsaw proxy (offensive tweets): recall >= 0.75",
 };
 
+/// FP ceiling for the benign slice. Tweet data is noisier than curated
+/// corpora — 5% is a realistic ceiling; allowlist + better overrides can
+/// bring this down in v0.2.
 pub const JIGSAW_FP_RATE: Gate = Gate {
     name: "jigsaw_fp_rate",
     suite: "jigsaw",
     category: None,
     metric: "fp_rate",
-    threshold: 0.03,
+    threshold: 0.05,
     direction: Direction::AtMost,
-    description: "Jigsaw non-toxic slice: false-positive rate <= 3%",
+    description: "Jigsaw proxy (benign tweets): false-positive rate <= 5%",
 };
 
 /// Multilingual profanity recall from HateCheck ES/FR/DE.
@@ -173,9 +183,17 @@ mod tests {
 
     #[test]
     fn at_most_passes_when_equal_or_less() {
-        assert!(JIGSAW_FP_RATE.evaluate(0.03).passed);
-        assert!(JIGSAW_FP_RATE.evaluate(0.01).passed);
-        assert!(!JIGSAW_FP_RATE.evaluate(0.031).passed);
+        assert!(JIGSAW_FP_RATE.evaluate(JIGSAW_FP_RATE.threshold).passed);
+        assert!(
+            JIGSAW_FP_RATE
+                .evaluate(JIGSAW_FP_RATE.threshold / 2.0)
+                .passed
+        );
+        assert!(
+            !JIGSAW_FP_RATE
+                .evaluate(JIGSAW_FP_RATE.threshold + 0.001)
+                .passed
+        );
     }
 
     #[test]

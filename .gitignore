@@ -26,6 +26,16 @@ node_modules
 # or `cargo build -p profanite-node`, never committed.
 **/*.node
 
+# Python tooling
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+dist/
+# Extension-module artifacts built by maturin develop
+crates/profanite-py/profanite/
+crates/profanite-py/profanite*.so
+
 # Bench outputs (when users run locally)
 bench-report.json
 bench-report.md

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "profanite"
+version = "0.1.0"
+description = "Kryptonite for profanities — lightweight, obfuscation-resistant profanity filter"
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Topic :: Text Processing :: Filters",
+    "Topic :: Internet :: WWW/HTTP :: Session",
+]
+
+[project.urls]
+Repository = "https://github.com/Beatsphere/profanite"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "profanite"

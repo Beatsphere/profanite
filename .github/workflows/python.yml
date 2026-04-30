@@ -1,0 +1,39 @@
+name: Python
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  smoke:
+    name: Build + smoke test Python binding
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install maturin + pytest
+        run: pip install 'maturin>=1.5,<2.0' pytest
+
+      - name: Build + install profanite
+        working-directory: crates/profanite-py
+        run: maturin develop --release
+
+      - name: Smoke test
+        run: pytest crates/profanite-py/tests/test_smoke.py -v

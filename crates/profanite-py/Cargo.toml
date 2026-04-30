@@ -9,9 +9,10 @@ authors.workspace = true
 description = "Python bindings for profanite (PyO3)"
 publish = false
 
-# PyO3 crate type lands in M5. For now this is a stub rlib.
 [lib]
-crate-type = ["rlib"]
+name = "profanite"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-profanite-core = { workspace = true }
+profanite-core = { workspace = true, features = ["all-langs"] }
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py38"] }
