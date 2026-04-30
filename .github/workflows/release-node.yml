@@ -140,17 +140,26 @@ jobs:
       - name: List staged npm packages
         run: ls -la npm/
 
-      - name: Publish platform subpackages
+      # Publish each platform subpackage + main package explicitly. We don't
+      # use `napi prepublish` because it has a bug where it redundantly
+      # attempts to re-publish the first subpackage after the loop finishes,
+      # which hits npm's "already published" 403 and aborts before the main
+      # package publish. `npm publish --access public` on each npm/<triple>
+      # dir gives us clean, sequential, idempotent publishing. If a
+      # subpackage is already at the target version (e.g. we're retrying
+      # a partially-failed release), `--tolerate-republish` would be nice
+      # but doesn't exist in npm; use `|| true` instead so a single 403
+      # doesn't kill the rest.
+      - name: Publish platform subpackages + main
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # `napi prepublish -t npm` publishes each platform subpackage.
-          # Despite the name, it does NOT publish the main package — that
-          # happens in the step below. `--skip-gh-release` suppresses the
-          # GitHub Release creation; we do that separately if at all.
-          npx napi prepublish -t npm --skip-gh-release
-
-      - name: Publish main package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance false
+          set -e
+          for dir in npm/*/; do
+            echo "::group::Publishing $dir"
+            (cd "$dir" && npm publish --access public) || echo "Warning: publish of $dir failed (may already be published)"
+            echo "::endgroup::"
+          done
+          echo "::group::Publishing main package"
+          npm publish --access public
+          echo "::endgroup::"
