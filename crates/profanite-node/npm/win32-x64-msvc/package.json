@@ -1,0 +1,35 @@
+{
+  "name": "@beatsphere/profanite-win32-x64-msvc",
+  "version": "0.1.5",
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "main": "profanite.win32-x64-msvc.node",
+  "files": [
+    "profanite.win32-x64-msvc.node"
+  ],
+  "description": "Kryptonite for profanities — lightweight, obfuscation-resistant profanity filter",
+  "keywords": [
+    "profanity",
+    "filter",
+    "censor",
+    "moderation",
+    "bad-words",
+    "chat",
+    "obfuscation"
+  ],
+  "license": "GPL-3.0-or-later",
+  "engines": {
+    "node": ">= 14"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Beatsphere/profanite.git"
+  }
+}

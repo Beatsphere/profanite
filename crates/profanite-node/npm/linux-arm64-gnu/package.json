@@ -1,0 +1,38 @@
+{
+  "name": "@beatsphere/profanite-linux-arm64-gnu",
+  "version": "0.1.5",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "main": "profanite.linux-arm64-gnu.node",
+  "files": [
+    "profanite.linux-arm64-gnu.node"
+  ],
+  "description": "Kryptonite for profanities — lightweight, obfuscation-resistant profanity filter",
+  "keywords": [
+    "profanity",
+    "filter",
+    "censor",
+    "moderation",
+    "bad-words",
+    "chat",
+    "obfuscation"
+  ],
+  "license": "GPL-3.0-or-later",
+  "engines": {
+    "node": ">= 14"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Beatsphere/profanite.git"
+  },
+  "libc": [
+    "glibc"
+  ]
+}
