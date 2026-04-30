@@ -1,0 +1,6 @@
+# Fetched real-world corpora that are too large or license-restricted to commit.
+# Keep the synthetic + HateCheck corpora (committed separately).
+jigsaw.jsonl
+jigsaw/
+*.parquet
+*.csv

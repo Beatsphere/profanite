@@ -1,0 +1,46 @@
+name: Bench
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fast:
+    name: Fast suite (synthetic + HateCheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Unit tests (bench harness)
+        run: cargo test -p profanite-bench
+
+      - name: Run fast suite (mode sweep + dump failures + markdown)
+        run: |
+          cargo run --release -p profanite-bench -- fast \
+            --mode-sweep \
+            --json bench-report.json \
+            --markdown bench-report.md \
+            --dump-failures bench-failures.jsonl
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-report
+          path: |
+            bench-report.json
+            bench-report.md
+            bench-failures.jsonl
+
+      - name: Comment PR with markdown report
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: bench
+          path: bench-report.md

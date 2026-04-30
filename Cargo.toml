@@ -1,0 +1,24 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/profanite-core",
+    "crates/profanite-node",
+    "crates/profanite-py",
+    "crates/profanite-semantic",
+    "bench",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.77"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/nishchaysinha/profanite"
+description = "Kryptonite for Profanities — lightweight, obfuscation-resistant profanity filter"
+authors = ["Nishchay Sinha"]
+
+[workspace.dependencies]
+profanite-core = { path = "crates/profanite-core", version = "0.1.0" }
+aho-corasick = "1.1"
+unicode-normalization = "0.1"
+thiserror = "1.0"

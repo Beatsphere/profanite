@@ -1,0 +1,47 @@
+{
+  "name": "profanite",
+  "version": "0.1.0",
+  "description": "Kryptonite for profanities — lightweight, obfuscation-resistant profanity filter",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nishchaysinha/profanite.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "profanity",
+    "filter",
+    "censor",
+    "moderation",
+    "bad-words",
+    "chat"
+  ],
+  "engines": {
+    "node": ">= 14"
+  },
+  "scripts": {
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform",
+    "test": "node test/smoke.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.0"
+  },
+  "napi": {
+    "name": "profanite",
+    "triples": {
+      "defaults": true,
+      "additional": [
+        "x86_64-unknown-linux-musl",
+        "aarch64-unknown-linux-gnu",
+        "aarch64-apple-darwin"
+      ]
+    }
+  }
+}

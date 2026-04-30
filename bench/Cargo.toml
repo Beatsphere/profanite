@@ -1,0 +1,23 @@
+[package]
+name = "profanite-bench"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Evaluation harness for profanite (not published)"
+publish = false
+
+[[bin]]
+name = "profanite-bench"
+path = "src/main.rs"
+
+[dependencies]
+profanite-core = { workspace = true, features = ["all-langs"] }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+sha2 = "0.10"
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }

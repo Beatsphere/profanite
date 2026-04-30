@@ -1,0 +1,154 @@
+{"text": "fuck", "label": "profane", "category": "plain", "lang": "en", "note": "baseline exact match"}
+{"text": "shit", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "bitch", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "asshole", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "motherfucker", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "cunt", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "bullshit", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "dickhead", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "cocksucker", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "what the fuck", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "holy shit", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "stop being an ass", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "that's fucking awesome", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "you're such a dickhead", "label": "profane", "category": "plain", "lang": "en"}
+{"text": "damn it", "label": "profane", "category": "plain", "lang": "en"}
+
+{"text": "hello world", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "good morning", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "the quick brown fox", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "how are you doing today", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "I love programming", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "she sells seashells by the seashore", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "machine learning is cool", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "have a great weekend", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "my computer is running slow", "label": "benign", "category": "plain_benign", "lang": "en"}
+{"text": "thanks for your help", "label": "benign", "category": "plain_benign", "lang": "en"}
+
+{"text": "Passing", "label": "benign", "category": "scunthorpe", "lang": "en", "note": "contains 'ass' inside benign word"}
+{"text": "passing the ball", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "classroom", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "class dismissed", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "assignment", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "assessment", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "assassin", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "bassline", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "Hemoglobin", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "my hemoglobin levels", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "compassion", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "massage therapy", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "harassment", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "embarrass", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "Scunthorpe United FC", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "shellfish dinner", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "hellish commute", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "hellenic culture", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "damnation is a word", "label": "benign", "category": "scunthorpe", "lang": "en"}
+{"text": "compass needle", "label": "benign", "category": "scunthorpe", "lang": "en"}
+
+{"text": "Hemoglomotherfuckerbin", "label": "profane", "category": "concat", "lang": "en"}
+{"text": "supermotherfuckerific", "label": "profane", "category": "concat", "lang": "en"}
+{"text": "prefixbullshitsuffix", "label": "profane", "category": "concat", "lang": "en"}
+{"text": "classdickheadroom", "label": "profane", "category": "concat", "lang": "en"}
+{"text": "Xasshole2000", "label": "profane", "category": "concat", "lang": "en"}
+{"text": "mothermotherfuckerer", "label": "profane", "category": "concat", "lang": "en"}
+{"text": "extracocksuckerextra", "label": "profane", "category": "concat", "lang": "en"}
+{"text": "overbullshitunder", "label": "profane", "category": "concat", "lang": "en"}
+
+{"text": "FUCK", "label": "profane", "category": "case", "lang": "en"}
+{"text": "Fuck you", "label": "profane", "category": "case", "lang": "en"}
+{"text": "FuCk ThIs", "label": "profane", "category": "case", "lang": "en"}
+{"text": "SHIT HAPPENS", "label": "profane", "category": "case", "lang": "en"}
+{"text": "MotherFucker", "label": "profane", "category": "case", "lang": "en"}
+{"text": "BITCH", "label": "profane", "category": "case", "lang": "en"}
+
+{"text": "fuuuuuuck", "label": "profane", "category": "repeat", "lang": "en"}
+{"text": "shiiiiit", "label": "profane", "category": "repeat", "lang": "en"}
+{"text": "biiiiitch", "label": "profane", "category": "repeat", "lang": "en"}
+{"text": "fuckkkkk", "label": "profane", "category": "repeat", "lang": "en"}
+{"text": "fuuuck you", "label": "profane", "category": "repeat", "lang": "en"}
+{"text": "shiiiit", "label": "profane", "category": "repeat", "lang": "en"}
+{"text": "bullshiiit", "label": "profane", "category": "repeat", "lang": "en"}
+{"text": "assssshole", "label": "profane", "category": "repeat", "lang": "en"}
+
+{"text": "fuсk", "label": "profane", "category": "homoglyph", "lang": "en", "note": "с = Cyrillic es U+0441"}
+{"text": "fυck", "label": "profane", "category": "homoglyph", "lang": "en", "note": "υ = Greek upsilon U+03C5"}
+{"text": "ＦＵＣＫ", "label": "profane", "category": "homoglyph", "lang": "en", "note": "fullwidth"}
+{"text": "ｓｈｉｔ", "label": "profane", "category": "homoglyph", "lang": "en", "note": "fullwidth"}
+{"text": "МotherFucker", "label": "profane", "category": "homoglyph", "lang": "en", "note": "Cyrillic М"}
+{"text": "bіtch", "label": "profane", "category": "homoglyph", "lang": "en", "note": "Cyrillic і"}
+{"text": "fuсking", "label": "profane", "category": "homoglyph", "lang": "en"}
+{"text": "asshоle", "label": "profane", "category": "homoglyph", "lang": "en", "note": "Cyrillic о"}
+
+{"text": "@ss", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "@ss hat", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "sh1t", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "sh1t happens", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "b!tch", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "b!tch please", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "d@mn", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "d@mn it", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "bullsh!t", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "a$$hole", "label": "profane", "category": "leet", "lang": "en"}
+{"text": "$hit", "label": "profane", "category": "leet", "lang": "en"}
+
+{"text": "fu‮ck", "label": "profane", "category": "bidi", "lang": "en", "note": "RLO inserted mid-word"}
+{"text": "‮fuck‬", "label": "profane", "category": "bidi", "lang": "en", "note": "bidi-wrapped"}
+{"text": "shi​t", "label": "profane", "category": "zwsp", "lang": "en", "note": "zero-width space inserted"}
+{"text": "fu‌ck", "label": "profane", "category": "zwsp", "lang": "en", "note": "zero-width non-joiner"}
+{"text": "b itch", "label": "profane", "category": "nbsp", "lang": "en", "note": "non-breaking space"}
+
+{"text": "FＵＣＫ", "label": "profane", "category": "stacked", "lang": "en", "note": "mixed fullwidth + ASCII"}
+{"text": "fuсkkkkking", "label": "profane", "category": "stacked", "lang": "en", "note": "homoglyph + repeat"}
+{"text": "@ssh0le", "label": "profane", "category": "stacked", "lang": "en", "note": "leet + compound"}
+{"text": "motherfuсker", "label": "profane", "category": "stacked", "lang": "en", "note": "strict compound + homoglyph"}
+{"text": "МОТHERFUCKER", "label": "profane", "category": "stacked", "lang": "en", "note": "mixed Cyrillic+Latin uppercase"}
+{"text": "b1Tch", "label": "profane", "category": "stacked", "lang": "en"}
+
+{"text": "hey whats up", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "lol wtf", "label": "benign", "category": "chat_benign", "lang": "en", "note": "initialism, not expanded"}
+{"text": "gg wp", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "brb dinner", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "see you tomorrow", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "that was a great meeting", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "nice weather today", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "lunch at 12?", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "on my way", "label": "benign", "category": "chat_benign", "lang": "en"}
+{"text": "sounds good", "label": "benign", "category": "chat_benign", "lang": "en"}
+
+{"text": "the teacher is passionate about math", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "the classmate dismissed the idea", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "she was embarrassed about the mistake", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "hemoglobin carries oxygen in red blood cells", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "the bass line in jazz is fundamental", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "I took a massage class last week", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "the assessment was fair and thorough", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "she grew up in Scunthorpe", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "passing grade requires 60%", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "the bassoon section played beautifully", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "a class of cellular proteins", "label": "benign", "category": "context_benign", "lang": "en"}
+{"text": "hellenistic period art", "label": "benign", "category": "context_benign", "lang": "en"}
+
+{"text": "this is some real damn nonsense", "label": "profane", "category": "mild", "lang": "en"}
+{"text": "what the hell was that", "label": "profane", "category": "mild", "lang": "en"}
+{"text": "oh crap I forgot", "label": "profane", "category": "mild", "lang": "en"}
+{"text": "piss off already", "label": "profane", "category": "mild", "lang": "en"}
+{"text": "stop being an ass about it", "label": "profane", "category": "mild", "lang": "en"}
+
+
+
+
+
+{"text": "file://localhost/var/log/httpd/access_log", "label": "benign", "category": "tricky_benign", "lang": "en", "note": "URL — shouldn't fire on path segments"}
+{"text": "https://www.example.com/assistance/help", "label": "benign", "category": "tricky_benign", "lang": "en", "note": "URL with 'ass' as prefix"}
+{"text": "the equation a**b means a raised to b", "label": "benign", "category": "tricky_benign", "lang": "en"}
+{"text": "3+3=6 not 3*3=9", "label": "benign", "category": "tricky_benign", "lang": "en"}
+{"text": "I have $50 in my pocket", "label": "benign", "category": "tricky_benign", "lang": "en", "note": "$ as currency, not leet"}
+{"text": "email me at user@domain.com", "label": "benign", "category": "tricky_benign", "lang": "en", "note": "@ as email separator"}
+{"text": "1234567890", "label": "benign", "category": "tricky_benign", "lang": "en"}
+{"text": "", "label": "benign", "category": "edge", "lang": "en", "note": "empty string"}
+{"text": "   ", "label": "benign", "category": "edge", "lang": "en", "note": "whitespace only"}
+{"text": "a", "label": "benign", "category": "edge", "lang": "en", "note": "single char"}
+{"text": "f", "label": "benign", "category": "edge", "lang": "en"}
+{"text": "fuc", "label": "benign", "category": "edge", "lang": "en", "note": "prefix-only, not a word"}
+{"text": "uck", "label": "benign", "category": "edge", "lang": "en", "note": "suffix-only"}

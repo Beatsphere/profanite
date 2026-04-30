@@ -1,0 +1,52 @@
+name: Node
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  smoke:
+    name: Build + smoke test Node binding
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Build the binding (release)
+        run: cargo build -p profanite-node --release
+
+      - name: Stage .node binary (Linux)
+        if: runner.os == 'Linux'
+        run: cp target/release/libprofanite_node.so crates/profanite-node/profanite.linux-x64.node
+
+      - name: Stage .node binary (macOS)
+        if: runner.os == 'macOS'
+        run: cp target/release/libprofanite_node.dylib crates/profanite-node/profanite.darwin-$(uname -m).node
+
+      - name: Stage .node binary (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: cp target/release/profanite_node.dll crates/profanite-node/profanite.win32-x64.node
+
+      - name: Smoke test
+        run: node crates/profanite-node/test/smoke.js
+
+      - name: Perf sanity (informational)
+        if: runner.os != 'Windows'
+        run: node crates/profanite-node/test/perf.js
