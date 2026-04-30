@@ -45,12 +45,11 @@ jobs:
               cp ../../target/aarch64-unknown-linux-gnu/release/libprofanite_node.so profanite.linux-arm64-gnu.node
               aarch64-linux-gnu-strip profanite.linux-arm64-gnu.node || true
 
-          - host: macos-13
-            target: x86_64-apple-darwin
-            build: |
-              cargo build --release --target x86_64-apple-darwin
-              cp ../../target/x86_64-apple-darwin/release/libprofanite_node.dylib profanite.darwin-x64.node
-              strip -x profanite.darwin-x64.node || true
+          # darwin-x64 (Intel Mac) deprecated — GitHub's macos-13 runner pool
+          # is being wound down and routinely queues for 20+ minutes. Intel
+          # Mac support has been dropped across the wider ecosystem too.
+          # Users on Intel Macs can still build from source; arm64 covers
+          # every Apple Silicon machine from the M1 onward.
 
           - host: macos-14
             target: aarch64-apple-darwin

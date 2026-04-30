@@ -59,6 +59,10 @@ jobs:
           path: crates/profanite-py/dist/*.whl
           if-no-files-found: error
 
+  # macos x86_64 (Intel) wheels dropped — GitHub's macos-13 runner pool is
+  # being deprecated and queues for 20+ minutes. Intel Mac users can still
+  # build from sdist via `pip install profanite` (which will fall back to
+  # the sdist when no matching wheel is found).
   macos:
     name: macos-${{ matrix.platform.target }}
     runs-on: ${{ matrix.platform.runner }}
@@ -66,8 +70,6 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - runner: macos-13
-            target: x86_64
           - runner: macos-14
             target: aarch64
     steps:
