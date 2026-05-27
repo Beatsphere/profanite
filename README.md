@@ -25,6 +25,9 @@
 - Tiered wordlist: short ambiguous stems (e.g. `ass`, `hell`) require word boundaries; unambiguous compounds (e.g. `motherfucker`, `bullshit`) match anywhere so bypasses like `Hemoglomotherfuckerbin` still fire
 - Allowlist escape hatch for the Scunthorpe problem
 - Bundled dictionaries from the CC0 [LDNOOBW](https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words) list, with curated English overrides layered on top
+- **Optional semantic scoring** via a small BERT-based toxicity model ([Xenova/toxic-bert](https://huggingface.co/Xenova/toxic-bert), int8 ONNX, ~30 MB). Two pluggable hooks:
+  - **Suppression** (`SemanticScorer`) — re-checks keyword hits against the model to kill false positives
+  - **Recall recovery** (`SemanticDetector`) — catches profanity the keyword matcher missed (paraphrases, typos, novel slang)
 - Continuous benchmark harness with release gates (see `BENCHMARK.md`)
 
 ---
@@ -216,6 +219,66 @@ print("quickstart ok")
 | `without_bundled()` / `withoutBundled`    | start empty; caller supplies the whole list                       | `false`             |
 
 Severity is a `1..=3` band (1 = mild, 3 = most severe). `strict: true` tells the matcher to ignore word boundaries for that entry — the right choice for long unambiguous compounds.
+
+---
+
+## Semantic scoring (optional)
+
+The keyword matcher is fast and precise, but it can only catch text that matches a wordlist entry. For cases where profanity is paraphrased, misspelled beyond normalization, or uses novel slang, profanite ships an optional BERT-based toxicity model that runs alongside the keyword pipeline.
+
+### How it works
+
+```
+Input text
+    │
+    ▼
+┌─────────────────┐
+│ Keyword matcher  │──▶ hits found? ──yes──▶ SemanticScorer (suppression)
+│ (fast, precise)  │                              │
+└─────────────────┘                         score ≥ threshold? → keep hit
+    │                                       score < threshold? → drop hit
+    no hits
+    │
+    ▼
+┌─────────────────────┐
+│ SemanticDetector     │──▶ score ≥ threshold? → emit synthetic match
+│ (recall recovery)    │    score < threshold? → clean input, nothing flagged
+└─────────────────────┘
+```
+
+### Quick start (Rust)
+
+```toml
+[dependencies]
+profanite-core = "0.1.9"
+profanite-semantic = { version = "0.1.9", features = ["onnx"] }
+```
+
+```rust
+use std::sync::Arc;
+use profanite_core::Profanite;
+use profanite_semantic::OnnxToxicScorer;
+
+// Load once (~30 MB download on first run, cached after).
+let scorer = Arc::new(OnnxToxicScorer::from_pretrained().unwrap());
+
+let filter = Profanite::builder()
+    .language(profanite_core::Lang::En)
+    // Suppression: only drop keyword hits the model is very sure are FPs.
+    .scorer(scorer.clone())
+    .min_confidence(0.05)
+    // Recall recovery: catch things the keyword matcher missed.
+    .detector(scorer)
+    .detector_threshold(0.5)
+    .build()
+    .unwrap();
+
+filter.contains_profanity("what the fuck");  // true  (keyword hit)
+filter.contains_profanity("go drink bleach"); // true  (detector recovery)
+filter.contains_profanity("have a nice day"); // false
+```
+
+The model is `Xenova/toxic-bert` — a pre-quantized int8 ONNX export of `unitary/toxic-bert` (BERT-base, English). It runs in ~5 ms per inference on CPU via ONNX Runtime. The `onnx` feature is fully optional; users who don't enable it get zero extra dependencies.
 
 ---
 
