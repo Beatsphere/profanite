@@ -11,7 +11,7 @@
 
 ## Status
 
-- **Version:** `0.1.9`
+- **Version:** `0.1.10`
 - **Bundled languages:** English (`en`), Spanish (`es`), Hindi (romanized) (`hi`), French (`fr`), German (`de`)
 - **Targets:** Rust (native) · Node.js (napi-rs binding) · Python (maturin binding)
 - **MSRV:** Rust `1.77`
@@ -40,13 +40,13 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-profanite-core = "0.1.9"
+profanite-core = "0.1.10"
 ```
 
 Feature flags select which bundled language lists compile in. Default is `lang-en`. Turn on others explicitly, or enable `all-langs`:
 
 ```toml
-profanite-core = { version = "0.1.9", features = ["all-langs"] }
+profanite-core = { version = "0.1.10", features = ["all-langs"] }
 ```
 
 ### Node.js
@@ -250,8 +250,8 @@ Input text
 
 ```toml
 [dependencies]
-profanite-core = "0.1.9"
-profanite-semantic = { version = "0.1.9", features = ["onnx"] }
+profanite-core = "0.1.10"
+profanite-semantic = { version = "0.1.10", features = ["onnx"] }
 ```
 
 ```rust

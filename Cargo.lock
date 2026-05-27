@@ -1584,7 +1584,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-bench"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1598,7 +1598,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-core"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "aho-corasick",
  "criterion",
@@ -1609,7 +1609,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-node"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "napi",
  "napi-build",
@@ -1619,7 +1619,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-py"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "profanite-core",
  "pyo3",
@@ -1627,7 +1627,7 @@ dependencies = [
 
 [[package]]
 name = "profanite-semantic"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "hf-hub",
  "ndarray",
