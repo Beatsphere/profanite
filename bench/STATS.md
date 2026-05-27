@@ -4,4 +4,10 @@
 |---|---|---:|---:|---:|---:|---:|
 | synthetic | basic | 137 | 0.986 | 1.000 | 0.000 | 0.993 |
 | hatecheck | basic | 3146 | 0.118 | 1.000 | 0.000 | 0.211 |
-| jigsaw | basic | 23353 | 0.770 | 0.987 | 0.046 | 0.865 |
+
+**With semantic scorer (Xenova/toxic-bert int8, suppression=0.05, detector=0.5):**
+
+| Suite | Mode | n | recall | Δrecall | precision | fp_rate | Δfp_rate | f1 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| synthetic | basic+semantic | 137 | 0.931 | -0.056 | 0.944 | 0.062 | +0.062 | 0.937 |
+| hatecheck | basic+semantic | 3146 | 0.172 | +0.054 | 1.000 | 0.000 | +0.000 | 0.294 |

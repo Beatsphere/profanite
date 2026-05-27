@@ -311,6 +311,9 @@ fn load_baseline(path: &Path) -> Result<FullReport> {
 /// for splicing into the README. The block contains only stable,
 /// human-readable summary rows — no timestamps or git revs — so
 /// regenerating it only changes content when measurements change.
+///
+/// When built with the `semantic` feature, also appends a
+/// keyword+encoder comparison table.
 pub fn run_snapshot(out: &Path) -> Result<()> {
     let reg = registry();
     let mut lines = vec![
@@ -338,6 +341,53 @@ pub fn run_snapshot(out: &Path) -> Result<()> {
             "| {} | basic | {} | {:.3} | {:.3} | {:.3} | {:.3} |",
             suite.suite, suite.cases, m.recall, m.precision, m.fp_rate, m.f1
         ));
+    }
+
+    // Semantic comparison table (only when the feature is compiled in).
+    if let Ok(handles) = load_semantic_handles() {
+        lines.push(String::new());
+        lines.push("**With semantic scorer (Xenova/toxic-bert int8, suppression=0.05, detector=0.5):**".to_string());
+        lines.push(String::new());
+        lines.push("| Suite | Mode | n | recall | Δrecall | precision | fp_rate | Δfp_rate | f1 |".to_string());
+        lines.push("|---|---|---:|---:|---:|---:|---:|---:|---:|".to_string());
+        for def in &reg {
+            let path = corpus_path(def.file);
+            if !path.exists() {
+                continue;
+            }
+            let baseline = run_suite(
+                def,
+                &path,
+                NormalizationLevel::Basic,
+                &RunOptions::default(),
+                None,
+            )?;
+            let semantic = run_suite(
+                def,
+                &path,
+                NormalizationLevel::Basic,
+                &RunOptions::default(),
+                Some(SemanticAttach {
+                    scorer: handles.scorer.clone(),
+                    detector: handles.detector.clone(),
+                    suppression_threshold: 0.05,
+                    detector_threshold: 0.5,
+                }),
+            )?;
+            let b = &baseline.eval.overall;
+            let s = &semantic.eval.overall;
+            lines.push(format!(
+                "| {} | basic+semantic | {} | {:.3} | {:+.3} | {:.3} | {:.3} | {:+.3} | {:.3} |",
+                def.name,
+                semantic.cases,
+                s.recall,
+                s.recall - b.recall,
+                s.precision,
+                s.fp_rate,
+                s.fp_rate - b.fp_rate,
+                s.f1
+            ));
+        }
     }
 
     let ws_root = workspace_root();

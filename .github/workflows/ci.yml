@@ -31,7 +31,10 @@ jobs:
       # libpython symbols unresolved at link time, which breaks
       # `cargo clippy --all-targets` on hosts without a matching libpython.
       # The Python crate is checked separately by the Python workflow.
-      - run: cargo clippy --workspace --exclude profanite-py --all-targets --all-features -- -D warnings
+      # Use explicit feature flags rather than --all-features to avoid
+      # pulling the heavy `onnx`/`semantic` features (which require
+      # downloading ONNX Runtime binaries at build time).
+      - run: cargo clippy --workspace --exclude profanite-py --all-targets --features all-langs -- -D warnings
 
   test:
     strategy:
@@ -42,4 +45,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --workspace --exclude profanite-py --all-features
+      - run: cargo test --workspace --exclude profanite-py --features all-langs
