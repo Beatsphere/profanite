@@ -346,9 +346,15 @@ pub fn run_snapshot(out: &Path) -> Result<()> {
     // Semantic comparison table (only when the feature is compiled in).
     if let Ok(handles) = load_semantic_handles() {
         lines.push(String::new());
-        lines.push("**With semantic scorer (Xenova/toxic-bert int8, suppression=0.05, detector=0.5):**".to_string());
+        lines.push(
+            "**With semantic scorer (Xenova/toxic-bert int8, suppression=0.05, detector=0.5):**"
+                .to_string(),
+        );
         lines.push(String::new());
-        lines.push("| Suite | Mode | n | recall | Δrecall | precision | fp_rate | Δfp_rate | f1 |".to_string());
+        lines.push(
+            "| Suite | Mode | n | recall | Δrecall | precision | fp_rate | Δfp_rate | f1 |"
+                .to_string(),
+        );
         lines.push("|---|---|---:|---:|---:|---:|---:|---:|---:|".to_string());
         for def in &reg {
             let path = corpus_path(def.file);

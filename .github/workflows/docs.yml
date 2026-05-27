@@ -20,17 +20,9 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Install pyarrow (for bench/scripts/fetch_jigsaw.sh)
-        run: pip install pyarrow
-
-      - name: Fetch Jigsaw proxy corpus (if not committed)
-        run: |
-          if [ ! -f bench/data/jigsaw.jsonl ]; then
-            bash bench/scripts/fetch_jigsaw.sh
-          fi
-
-      - name: Regenerate bench/STATS.md from the live filter
-        run: cargo run --release -p profanite-bench -- snapshot
-
-      - name: Regenerate README.md from template + examples + fresh stats
+      # bench/STATS.md is committed and regenerated locally via
+      # `cargo run -p profanite-bench --features semantic -- snapshot`.
+      # CI only checks that README.md is consistent with the committed
+      # STATS.md + template + examples — it does NOT re-run the bench.
+      - name: Check README.md matches template + committed stats
         run: python3 scripts/sync-readme.py --check

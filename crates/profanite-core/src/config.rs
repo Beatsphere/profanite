@@ -634,7 +634,10 @@ mod tests {
         assert_eq!(hits.len(), 1);
         let m = &hits[0];
         assert!(m.is_semantic(), "detector hit should be marked semantic");
-        assert_eq!(m.original_span, (0, "definitely a paraphrased insult".len()));
+        assert_eq!(
+            m.original_span,
+            (0, "definitely a paraphrased insult".len())
+        );
     }
 
     #[test]

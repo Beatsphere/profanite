@@ -139,7 +139,10 @@ pub fn print_suite(report: &SuiteReport) {
 /// gate set is meaningful (gates are calibrated against that).
 pub fn print_semantic_delta(baseline: &SuiteReport, semantic: &SuiteReport) {
     assert!(!baseline.semantic_attached, "baseline must be keyword-only");
-    assert!(semantic.semantic_attached, "comparison must have scorer attached");
+    assert!(
+        semantic.semantic_attached,
+        "comparison must have scorer attached"
+    );
 
     let b = &baseline.eval.overall;
     let s = &semantic.eval.overall;
