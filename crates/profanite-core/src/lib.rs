@@ -17,5 +17,5 @@ pub use config::{MatchMode, NormalizationLevel, Profanite, ProfaniteBuilder};
 pub use data::{Category, WordEntry};
 pub use error::Error;
 pub use lang::Lang;
-pub use matcher::Match;
-pub use scorer::{AlwaysProfane, MatchContext, SemanticScorer};
+pub use matcher::{Match, SEMANTIC_WORD_ID};
+pub use scorer::{AlwaysProfane, MatchContext, SemanticDetector, SemanticScorer};

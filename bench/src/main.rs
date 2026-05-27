@@ -47,6 +47,30 @@ struct RunArgs {
     /// Run each suite under both Basic and Aggressive normalization modes.
     #[arg(long)]
     mode_sweep: bool,
+
+    /// Attach the candle-backed XLM-R toxicity scorer (Detoxify
+    /// multilingual) and run each suite twice — keyword-only baseline
+    /// and keyword+encoder — printing the per-gate delta.
+    ///
+    /// Requires the binary to have been built with `--features semantic`
+    /// and a model in the hf-hub cache (or downloadable). First run
+    /// pulls ~1.1 GB of weights.
+    #[arg(long)]
+    semantic: bool,
+
+    /// Suppression threshold: keyword hits whose semantic score falls
+    /// below this are dropped. Default is intentionally low (0.05) —
+    /// toxic-bert tends to score bypassed/normalized profanity as
+    /// not-toxic, so a higher threshold ends up killing correct keyword
+    /// matches. Only meaningful with `--semantic`.
+    #[arg(long, default_value_t = 0.05)]
+    suppression_threshold: f32,
+
+    /// Detector threshold: when the keyword pass returns nothing, a
+    /// detector score >= this triggers a synthetic match covering the
+    /// whole input. Only meaningful with `--semantic`.
+    #[arg(long, default_value_t = 0.5)]
+    detector_threshold: f32,
 }
 
 impl From<RunArgs> for RunOptions {
@@ -58,6 +82,9 @@ impl From<RunArgs> for RunOptions {
             baseline: a.baseline,
             baseline_noise: a.baseline_noise,
             mode_sweep: a.mode_sweep,
+            semantic: a.semantic,
+            suppression_threshold: a.suppression_threshold,
+            detector_threshold: a.detector_threshold,
         }
     }
 }

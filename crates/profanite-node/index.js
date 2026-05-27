@@ -65,14 +65,21 @@ function tryLoad() {
     if (existsSync(path)) return require(path);
   }
 
-  // 3. cargo build artifact (dev-mode in the monorepo).
+  // 3. cargo build artifact (dev-mode in the monorepo). cargo emits
+  // libprofanite_node.so/.dylib/.dll, but `require()` only loads addons
+  // through `.node` — so we go via process.dlopen, which doesn't care
+  // about the extension.
   let dir = __dirname;
   for (let i = 0; i < 6; i++) {
     for (const profile of ['release', 'debug']) {
       const libExt = platform === 'win32' ? '.dll' : platform === 'darwin' ? '.dylib' : '.so';
       const prefix = platform === 'win32' ? '' : 'lib';
       const candidate = resolve(dir, 'target', profile, `${prefix}profanite_node${libExt}`);
-      if (existsSync(candidate)) return require(candidate);
+      if (existsSync(candidate)) {
+        const m = { exports: {} };
+        process.dlopen(m, candidate);
+        return m.exports;
+      }
     }
     dir = resolve(dir, '..');
   }

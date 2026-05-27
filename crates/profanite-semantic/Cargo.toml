@@ -9,5 +9,28 @@ authors.workspace = true
 description = "Semantic (embedding-based) scoring seam for profanite"
 publish = false
 
+[features]
+default = []
+# Real ONNX-Runtime-backed scorer. Off by default so the workspace's
+# zero-dep posture survives for users who only want the keyword matcher
+# and the trait re-exports.
+onnx = [
+    "dep:ort",
+    "dep:ndarray",
+    "dep:tokenizers",
+    "dep:hf-hub",
+    "dep:thiserror",
+]
+
 [dependencies]
 profanite-core = { workspace = true }
+
+ort = { version = "2.0.0-rc.12", optional = true, default-features = false, features = ["std", "ndarray", "download-binaries", "tls-rustls", "copy-dylibs", "api-24"] }
+ndarray = { version = "0.17", optional = true }
+tokenizers = { version = "0.22", optional = true, default-features = false, features = ["onig"] }
+hf-hub = { version = "0.4", optional = true, default-features = false, features = ["ureq", "rustls-tls"] }
+thiserror = { version = "1", optional = true }
+
+[[example]]
+name = "onnx_oracle"
+required-features = ["onnx"]

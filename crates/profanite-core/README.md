@@ -38,7 +38,7 @@ Run `cargo run -p profanite-bench -- fast` in the workspace. Current numbers liv
 
 ### Node.js and Python bindings
 
-- **Node**: [`profanite`](https://www.npmjs.com/package/profanite) on npm.
+- **Node**: [`@beatsphere/profanite`](https://www.npmjs.com/package/@beatsphere/profanite) on npm.
 - **Python**: [`profanite`](https://pypi.org/project/profanite/) on PyPI.
 
 License: GPL-3.0-or-later.

@@ -7,9 +7,9 @@ use crate::censor::{self, CensorStyle};
 use crate::data::{bundled_for, Category, WordEntry};
 use crate::error::Error;
 use crate::lang::Lang;
-use crate::matcher::{Match, Matcher};
+use crate::matcher::{Match, Matcher, SEMANTIC_WORD_ID};
 use crate::normalize;
-use crate::scorer::{MatchContext, SemanticScorer};
+use crate::scorer::{MatchContext, SemanticDetector, SemanticScorer};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum MatchMode {
@@ -37,6 +37,8 @@ pub struct Profanite {
     normalization: NormalizationLevel,
     scorer: Option<Arc<dyn SemanticScorer>>,
     min_confidence: f32,
+    detector: Option<Arc<dyn SemanticDetector>>,
+    detector_threshold: f32,
 }
 
 impl std::fmt::Debug for Profanite {
@@ -50,6 +52,8 @@ impl std::fmt::Debug for Profanite {
             .field("normalization", &self.normalization)
             .field("scorer", &self.scorer.is_some())
             .field("min_confidence", &self.min_confidence)
+            .field("detector", &self.detector.is_some())
+            .field("detector_threshold", &self.detector_threshold)
             .finish()
     }
 }
@@ -66,8 +70,14 @@ impl Profanite {
 
     /// Return every profanity hit in `text`.
     ///
-    /// If a semantic scorer is attached, each keyword hit is passed to the
-    /// scorer; hits scoring below `min_confidence` are dropped.
+    /// Pipeline:
+    /// 1. Keyword matcher (with normalization + allowlist filtering).
+    /// 2. If a `SemanticScorer` is attached, each candidate hit is passed
+    ///    to it; hits scoring below `min_confidence` are dropped.
+    /// 3. If no hits survived AND a `SemanticDetector` is attached,
+    ///    `detector.detect(text)` is consulted; if it meets
+    ///    `detector_threshold`, a synthetic match covering the whole
+    ///    input is emitted.
     pub fn find(&self, text: &str) -> Vec<Match> {
         let norm = normalize::normalize(text, self.normalization);
         let mut hits = self.matcher.scan(&norm, self.match_mode);
@@ -81,6 +91,13 @@ impl Profanite {
                 scorer.score(&ctx) >= self.min_confidence
             });
         }
+        if hits.is_empty() {
+            if let Some(detector) = &self.detector {
+                if detector.detect(text) >= self.detector_threshold {
+                    hits.push(synthetic_match(text));
+                }
+            }
+        }
         hits
     }
 
@@ -88,6 +105,16 @@ impl Profanite {
     pub fn censor(&self, text: &str) -> String {
         let hits = self.find(text);
         censor::apply(text, &hits, self.censor_style, self.mask_char)
+    }
+}
+
+fn synthetic_match(text: &str) -> Match {
+    Match {
+        word_id: SEMANTIC_WORD_ID,
+        original_span: (0, text.len()),
+        normalized_span: (0, 0),
+        category: Category::Strong,
+        severity: 2,
     }
 }
 
@@ -104,6 +131,8 @@ pub struct ProfaniteBuilder {
     skip_bundled: bool,
     scorer: Option<Arc<dyn SemanticScorer>>,
     min_confidence: Option<f32>,
+    detector: Option<Arc<dyn SemanticDetector>>,
+    detector_threshold: Option<f32>,
 }
 
 impl ProfaniteBuilder {
@@ -190,6 +219,22 @@ impl ProfaniteBuilder {
         self
     }
 
+    /// Attach a recall-recovery detector. When the keyword pass produces
+    /// zero surviving hits, the detector is consulted on the whole input.
+    /// If its score meets `detector_threshold`, a synthetic match
+    /// covering the whole input is emitted (with `word_id =
+    /// SEMANTIC_WORD_ID`, queryable via `Match::is_semantic`).
+    pub fn detector(mut self, detector: Arc<dyn SemanticDetector>) -> Self {
+        self.detector = Some(detector);
+        self
+    }
+
+    /// Override the default `detector_threshold` (0.5) for the attached detector.
+    pub fn detector_threshold(mut self, threshold: f32) -> Self {
+        self.detector_threshold = Some(threshold);
+        self
+    }
+
     pub fn build(self) -> Result<Profanite, Error> {
         let mut words: Vec<WordEntry> = Vec::new();
         if !self.skip_bundled {
@@ -233,6 +278,8 @@ impl ProfaniteBuilder {
             normalization: self.normalization.unwrap_or_default(),
             scorer: self.scorer,
             min_confidence: self.min_confidence.unwrap_or(0.5),
+            detector: self.detector,
+            detector_threshold: self.detector_threshold.unwrap_or(0.5),
         })
     }
 }
@@ -565,5 +612,52 @@ mod tests {
         p.find("what the fuck and also fucking bad");
         // Two matches -> two scorer calls.
         assert_eq!(counter.load(Ordering::SeqCst), 2);
+    }
+
+    struct ConstDetector(f32);
+    impl crate::scorer::SemanticDetector for ConstDetector {
+        fn detect(&self, _text: &str) -> f32 {
+            self.0
+        }
+    }
+
+    #[test]
+    fn detector_emits_synthetic_match_when_keyword_misses() {
+        let p = Profanite::builder()
+            .detector(std::sync::Arc::new(ConstDetector(0.9)))
+            .detector_threshold(0.5)
+            .build()
+            .unwrap();
+        // Benign-looking input the keyword matcher won't flag, but the
+        // detector says it's profane.
+        let hits = p.find("definitely a paraphrased insult");
+        assert_eq!(hits.len(), 1);
+        let m = &hits[0];
+        assert!(m.is_semantic(), "detector hit should be marked semantic");
+        assert_eq!(m.original_span, (0, "definitely a paraphrased insult".len()));
+    }
+
+    #[test]
+    fn detector_below_threshold_returns_no_hits() {
+        let p = Profanite::builder()
+            .detector(std::sync::Arc::new(ConstDetector(0.1)))
+            .detector_threshold(0.5)
+            .build()
+            .unwrap();
+        assert!(!p.contains_profanity("a totally fine sentence"));
+    }
+
+    #[test]
+    fn detector_does_not_run_when_keyword_already_hit() {
+        // Detector returning 0.0 would normally produce no hits. If the
+        // keyword pass already found one, the detector branch is skipped
+        // and we keep the keyword hit.
+        let p = Profanite::builder()
+            .detector(std::sync::Arc::new(ConstDetector(0.0)))
+            .build()
+            .unwrap();
+        let hits = p.find("what the fuck");
+        assert_eq!(hits.len(), 1);
+        assert!(!hits[0].is_semantic());
     }
 }

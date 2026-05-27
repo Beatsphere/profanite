@@ -13,7 +13,7 @@
 
 - **Version:** `0.1.9`
 - **Bundled languages:** English (`en`), Spanish (`es`), Hindi (romanized) (`hi`), French (`fr`), German (`de`)
-- **Targets:** Rust (native) · Node.js (napi-rs binding) · Python (planned)
+- **Targets:** Rust (native) · Node.js (napi-rs binding) · Python (maturin binding)
 - **MSRV:** Rust `1.77`
 
 ---

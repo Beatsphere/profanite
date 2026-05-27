@@ -13,7 +13,7 @@
 
 - **Version:** `{{VERSION}}`
 - **Bundled languages:** {{LANGUAGES}}
-- **Targets:** Rust (native) · Node.js (napi-rs binding) · Python (planned)
+- **Targets:** Rust (native) · Node.js (napi-rs binding) · Python (maturin binding)
 - **MSRV:** Rust `{{MSRV}}`
 
 ---

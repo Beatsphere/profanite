@@ -9,12 +9,21 @@ authors.workspace = true
 description = "Evaluation harness for profanite (not published)"
 publish = false
 
+[features]
+default = []
+# Enable the `--semantic` flag, which pulls in the ort-backed
+# OnnxToxicScorer (Xenova/toxic-bert int8). Off by default because
+# building it pulls ort + tokenizers + an ONNX Runtime download; CI
+# runs the keyword-only path.
+semantic = ["dep:profanite-semantic"]
+
 [[bin]]
 name = "profanite-bench"
 path = "src/main.rs"
 
 [dependencies]
 profanite-core = { workspace = true, features = ["all-langs"] }
+profanite-semantic = { path = "../crates/profanite-semantic", features = ["onnx"], optional = true }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

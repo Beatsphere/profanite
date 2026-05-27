@@ -4,13 +4,11 @@ Python bindings for [profanite](https://github.com/Beatsphere/profanite) — a l
 
 ## Install
 
-Until v0.1 ships to PyPI, build locally:
-
 ```bash
-pip install maturin
-cd crates/profanite-py
-maturin develop --release
+pip install profanite
 ```
+
+Prebuilt wheels for Linux (manylinux + musllinux, x86_64 + aarch64), macOS (x86_64 + arm64), and Windows x64. Python 3.8+ via the stable `abi3` ABI.
 
 ## Usage
 

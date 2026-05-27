@@ -18,6 +18,10 @@ pub struct SuiteReport {
     pub corpus_sha256: String,
     pub eval: EvalResult,
     pub gates: Vec<GateResult>,
+    /// True when this run had the semantic scorer attached. Old JSON
+    /// reports without this field default to false.
+    #[serde(default)]
+    pub semantic_attached: bool,
 }
 
 /// Top-level report bundling all suites we ran plus reproducibility metadata.
@@ -81,9 +85,14 @@ mod hex {
 
 pub fn print_suite(report: &SuiteReport) {
     let m = &report.eval.overall;
+    let semantic_tag = if report.semantic_attached {
+        " + semantic"
+    } else {
+        ""
+    };
     println!(
-        "\n── {} [{}] ({} cases) ──",
-        report.suite, report.mode, report.cases
+        "\n── {} [{}{}] ({} cases) ──",
+        report.suite, report.mode, semantic_tag, report.cases
     );
     println!(
         "  precision={:.3}  recall={:.3}  f1={:.3}  fp_rate={:.3}  accuracy={:.3}",
@@ -122,6 +131,46 @@ pub fn print_suite(report: &SuiteReport) {
             "  [{tag}] {} ({scope}) :: observed {:.3} (threshold {:.3})",
             gr.gate.name, gr.value, gr.gate.threshold
         );
+    }
+}
+
+/// Print a side-by-side delta block comparing keyword-only vs
+/// keyword+semantic on the same suite/mode. Only the keyword-only run's
+/// gate set is meaningful (gates are calibrated against that).
+pub fn print_semantic_delta(baseline: &SuiteReport, semantic: &SuiteReport) {
+    assert!(!baseline.semantic_attached, "baseline must be keyword-only");
+    assert!(semantic.semantic_attached, "comparison must have scorer attached");
+
+    let b = &baseline.eval.overall;
+    let s = &semantic.eval.overall;
+
+    println!(
+        "\n  Δ semantic [{}/{}]: \
+         Δrecall={:+.3}  Δprecision={:+.3}  Δfp_rate={:+.3}  Δf1={:+.3}",
+        baseline.suite,
+        baseline.mode,
+        s.recall - b.recall,
+        s.precision - b.precision,
+        s.fp_rate - b.fp_rate,
+        s.f1 - b.f1,
+    );
+
+    // Per-category: surface the cases where the encoder moves the needle.
+    let mut moved_cats: Vec<(&String, f64)> = Vec::new();
+    for (cat, sm) in &semantic.eval.per_category {
+        if let Some(bm) = baseline.eval.per_category.get(cat) {
+            let d = sm.recall - bm.recall;
+            if d.abs() >= 0.01 {
+                moved_cats.push((cat, d));
+            }
+        }
+    }
+    if !moved_cats.is_empty() {
+        moved_cats.sort_by(|a, b| b.1.abs().partial_cmp(&a.1.abs()).unwrap());
+        println!("    per-category Δrecall (|Δ| ≥ 0.01):");
+        for (cat, d) in moved_cats {
+            println!("      {cat:<20} {:+.3}", d);
+        }
     }
 }
 

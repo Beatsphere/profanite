@@ -9,8 +9,9 @@ use crate::gates::{self, Gate, GateInfo, GateResult};
 use crate::metrics::{self, Outcome};
 use crate::report::{self, FullReport, Metadata, SuiteReport};
 use anyhow::{bail, Context, Result};
-use profanite_core::{Lang, NormalizationLevel, Profanite};
+use profanite_core::{Lang, NormalizationLevel, Profanite, SemanticDetector, SemanticScorer};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 const DATA_DIR: &str = "bench/data";
 
@@ -23,6 +24,14 @@ pub struct RunOptions {
     pub baseline: Option<PathBuf>,
     pub baseline_noise: f64, // e.g. 0.005 = half a point
     pub mode_sweep: bool,
+    /// Run each suite a second time with the ONNX-backed scorer
+    /// attached and print the delta. Requires the `semantic` build
+    /// feature.
+    pub semantic: bool,
+    /// Suppression threshold (low → encoder almost never kills keyword hits).
+    pub suppression_threshold: f32,
+    /// Detector threshold (recall recovery on keyword misses).
+    pub detector_threshold: f32,
 }
 
 /// All suites we know how to run, in declared order.
@@ -90,6 +99,12 @@ fn run_selected(names: &[&str], opts: &RunOptions) -> Result<()> {
 
     let mut any = false;
 
+    let semantic: Option<SemanticHandles> = if opts.semantic {
+        Some(load_semantic_handles()?)
+    } else {
+        None
+    };
+
     for name in names {
         let def = reg
             .iter()
@@ -107,9 +122,27 @@ fn run_selected(names: &[&str], opts: &RunOptions) -> Result<()> {
         }
 
         for mode in &modes {
-            let suite = run_suite(def, &path, *mode, opts)?;
-            report::print_suite(&suite);
-            full.suites.push(suite);
+            let baseline_suite = run_suite(def, &path, *mode, opts, None)?;
+            report::print_suite(&baseline_suite);
+
+            if let Some(handles) = &semantic {
+                let semantic_suite = run_suite(
+                    def,
+                    &path,
+                    *mode,
+                    opts,
+                    Some(SemanticAttach {
+                        scorer: handles.scorer.clone(),
+                        detector: handles.detector.clone(),
+                        suppression_threshold: opts.suppression_threshold,
+                        detector_threshold: opts.detector_threshold,
+                    }),
+                )?;
+                report::print_semantic_delta(&baseline_suite, &semantic_suite);
+                full.suites.push(semantic_suite);
+            }
+
+            full.suites.push(baseline_suite);
             any = true;
         }
     }
@@ -156,14 +189,29 @@ fn run_selected(names: &[&str], opts: &RunOptions) -> Result<()> {
     Ok(())
 }
 
+struct SemanticHandles {
+    scorer: Arc<dyn SemanticScorer>,
+    detector: Arc<dyn SemanticDetector>,
+}
+
+#[derive(Clone)]
+struct SemanticAttach {
+    scorer: Arc<dyn SemanticScorer>,
+    detector: Arc<dyn SemanticDetector>,
+    suppression_threshold: f32,
+    detector_threshold: f32,
+}
+
 fn run_suite(
     def: &SuiteDef,
     path: &Path,
     mode: NormalizationLevel,
     opts: &RunOptions,
+    semantic: Option<SemanticAttach>,
 ) -> Result<SuiteReport> {
     let cases = corpus::load_jsonl(path)?;
-    let filter = build_filter(def.langs, mode)?;
+    let attached = semantic.is_some();
+    let filter = build_filter(def.langs, mode, semantic)?;
 
     let predictions: Vec<bool> = cases
         .iter()
@@ -202,6 +250,7 @@ fn run_suite(
         corpus_sha256,
         eval,
         gates,
+        semantic_attached: attached,
     })
 }
 
@@ -213,12 +262,44 @@ fn mode_name(m: NormalizationLevel) -> &'static str {
     }
 }
 
-fn build_filter(langs: &[Lang], mode: NormalizationLevel) -> Result<Profanite> {
+fn build_filter(
+    langs: &[Lang],
+    mode: NormalizationLevel,
+    semantic: Option<SemanticAttach>,
+) -> Result<Profanite> {
     let mut b = Profanite::builder().normalization(mode);
     for lang in langs {
         b = b.language(*lang);
     }
+    if let Some(s) = semantic {
+        b = b
+            .scorer(s.scorer)
+            .min_confidence(s.suppression_threshold)
+            .detector(s.detector)
+            .detector_threshold(s.detector_threshold);
+    }
     Ok(b.build()?)
+}
+
+#[cfg(feature = "semantic")]
+fn load_semantic_handles() -> Result<SemanticHandles> {
+    eprintln!("[semantic] loading Xenova/toxic-bert int8 ONNX (first run downloads ~30 MB)…");
+    let model = profanite_semantic::OnnxToxicScorer::from_pretrained()
+        .with_context(|| "loading OnnxToxicScorer")?;
+    let shared: Arc<profanite_semantic::OnnxToxicScorer> = Arc::new(model);
+    eprintln!("[semantic] model ready.");
+    Ok(SemanticHandles {
+        scorer: shared.clone(),
+        detector: shared,
+    })
+}
+
+#[cfg(not(feature = "semantic"))]
+fn load_semantic_handles() -> Result<SemanticHandles> {
+    bail!(
+        "this binary was built without the `semantic` feature; rebuild with \
+         `cargo build --release -p profanite-bench --features semantic` to use --semantic"
+    )
 }
 
 fn load_baseline(path: &Path) -> Result<FullReport> {
@@ -250,6 +331,7 @@ pub fn run_snapshot(out: &Path) -> Result<()> {
             &path,
             NormalizationLevel::Basic,
             &RunOptions::default(),
+            None,
         )?;
         let m = &suite.eval.overall;
         lines.push(format!(

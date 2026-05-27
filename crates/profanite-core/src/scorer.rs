@@ -35,3 +35,18 @@ impl SemanticScorer for AlwaysProfane {
         1.0
     }
 }
+
+/// A *recall-recovery* hook that runs even when the keyword matcher
+/// returned no hits. Implementations look at the whole text and return a
+/// confidence in `[0.0, 1.0]` that the input contains profanity that the
+/// keyword path missed (typos, paraphrase, novel slang).
+///
+/// When attached, the runtime calls `detect` only when the keyword pass
+/// produced zero surviving matches; if the result meets the configured
+/// threshold, the runtime emits a synthetic [`Match`](crate::Match)
+/// covering the whole input. Synthetic matches set `word_id` to
+/// `usize::MAX` and report `category: Category::Strong`, `severity: 2`.
+pub trait SemanticDetector: Send + Sync {
+    /// Confidence in `[0.0, 1.0]` that `text` contains profanity.
+    fn detect(&self, text: &str) -> f32;
+}

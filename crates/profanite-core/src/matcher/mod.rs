@@ -14,6 +14,8 @@ use crate::normalize::{self, NormalizedText};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Match {
     /// Index into the internal wordlist. Stable within a `Profanite` instance.
+    /// Set to `usize::MAX` for synthetic matches emitted by an attached
+    /// `SemanticDetector` — see [`Match::is_semantic`].
     pub word_id: usize,
     /// Byte span in the caller's original input.
     pub original_span: (usize, usize),
@@ -21,6 +23,20 @@ pub struct Match {
     pub normalized_span: (usize, usize),
     pub category: Category,
     pub severity: u8,
+}
+
+/// Sentinel `word_id` used by synthetic matches that come from the
+/// `SemanticDetector` recall path rather than the keyword wordlist.
+pub const SEMANTIC_WORD_ID: usize = usize::MAX;
+
+impl Match {
+    /// True if this match was produced by an attached `SemanticDetector`
+    /// rather than by a keyword wordlist hit. Useful for callers that
+    /// want to display a different label, fall back to a heavier filter,
+    /// or audit the encoder's contribution.
+    pub fn is_semantic(&self) -> bool {
+        self.word_id == SEMANTIC_WORD_ID
+    }
 }
 
 #[derive(Debug)]

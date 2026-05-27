@@ -58,8 +58,8 @@ The CLI exits non-zero if any gate fails.
 | `bypass_catch_rate` | synthetic (overall) | recall ≥ 0.85 | Hand-crafted bypass corpus: leet, homoglyph, repeat, concat, bidi, zero-width, etc. |
 | `hatecheck_profanity_recall` | hatecheck / `profanity_h` | recall ≥ 0.35 | Multilingual recall on HateCheck's profanity-bearing sentences. |
 | `hatecheck_leet_recall` | hatecheck / `spell_leet_h` | recall ≥ 0.10 | Leet-bypass robustness across ES/FR/DE. |
-| `jigsaw_recall` | jigsaw (overall) | recall ≥ 0.80 | Jigsaw `obscene` slice — realistic English chat. |
-| `jigsaw_fp_rate` | jigsaw (overall) | fp_rate ≤ 0.03 | Jigsaw `non-toxic` slice — benign English chat. |
+| `jigsaw_recall` | jigsaw (overall) | recall ≥ 0.75 | Jigsaw proxy (offensive tweets) — realistic English chat. |
+| `jigsaw_fp_rate` | jigsaw (overall) | fp_rate ≤ 0.05 | Jigsaw proxy (benign tweets) — benign English chat. |
 
 Jigsaw is not fetched by default because it's ~100 MB. The fast suite (synthetic + hatecheck) is what CI runs on every PR.
 
@@ -99,7 +99,7 @@ hatecheck [basic] (3146 cases)
 
 - **`bench/data/bypass_corpus.jsonl`** — hand-crafted. Apache-2.0. Committed.
 - **`bench/data/hatecheck.jsonl`** — generated from Paul et al.'s HateCheck-{Spanish,French,German} (CC-BY-4.0). Filtered to profanity-relevant functionalities. Re-fetch with `bash bench/scripts/convert_hatecheck.sh`.
-- **`bench/data/jigsaw.jsonl`** — generated from `google/jigsaw_toxicity_pred` (CC0). Not committed; fetch with the Jigsaw script (task #12).
+- **`bench/data/jigsaw.jsonl`** — generated from `tdavidson/hate_speech_offensive` (24.8K labeled tweets) as a proxy for the original `google/jigsaw_toxicity_pred` corpus, which moved behind auth. Not committed; fetch with `bash bench/scripts/fetch_jigsaw.sh`.
 
 ## Corpus schema
 
